@@ -323,7 +323,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         if (mCurrentDataset == null)
             return false;
 
-        if (!mCurrentDataset.load("ObjectRecognition/objectTarget.xml",
+        if (!mCurrentDataset.load("PicassoDB_OT.xml",
                 STORAGE_TYPE.STORAGE_APPRESOURCE))
             return false;
 
