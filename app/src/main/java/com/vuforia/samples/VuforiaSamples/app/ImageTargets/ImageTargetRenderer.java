@@ -36,6 +36,7 @@ import com.vuforia.samples.SampleApplication.utils.SampleApplication3DModel;
 import com.vuforia.samples.SampleApplication.utils.SampleUtils;
 import com.vuforia.samples.SampleApplication.utils.Teapot;
 import com.vuforia.samples.SampleApplication.utils.Texture;
+import com.vuforia.samples.VuforiaSamples.app.PicassoMr.CanvasOverlayView;
 
 
 // The renderer class for the ImageTargets sample. 
@@ -46,6 +47,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, SampleAppRen
     private SampleApplicationSession vuforiaAppSession;
     private ImageTargets mActivity;
     private SampleAppRenderer mSampleAppRenderer;
+
+    private CanvasOverlayView mOverlayView;
 
     private Vector<Texture> mTextures;
     
@@ -66,13 +69,14 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, SampleAppRen
     private static final float OBJECT_SCALE_FLOAT = 0.003f;
     
     
-    public ImageTargetRenderer(ImageTargets activity, SampleApplicationSession session)
+    public ImageTargetRenderer(ImageTargets activity, SampleApplicationSession session, CanvasOverlayView overlayView)
     {
         mActivity = activity;
         vuforiaAppSession = session;
         // SampleAppRenderer used to encapsulate the use of RenderingPrimitives setting
         // the device mode AR/VR and stereo mode
         mSampleAppRenderer = new SampleAppRenderer(this, mActivity, Device.MODE.MODE_AR, false, 0.01f , 5f);
+        mOverlayView = overlayView;
     }
     
     
@@ -190,99 +194,6 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, SampleAppRen
         // Renders video background replacing Renderer.DrawVideoBackground()
         mSampleAppRenderer.renderVideoBackground();
 
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-
-        // handle face culling, we need to detect if we are using reflection
-        // to determine the direction of the culling
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glCullFace(GLES20.GL_BACK);
-
-        // Did we find any trackables this frame?
-        for (int tIdx = 0; tIdx < state.getNumTrackableResults(); tIdx++) {
-            TrackableResult result = state.getTrackableResult(tIdx);
-            Trackable trackable = result.getTrackable();
-            printUserData(trackable);
-            Matrix44F modelViewMatrix_Vuforia = Tool
-                    .convertPose2GLMatrix(result.getPose());
-            float[] modelViewMatrix = modelViewMatrix_Vuforia.getData();
-
-            int textureIndex = trackable.getName().equalsIgnoreCase("stones") ? 0
-                    : 1;
-            textureIndex = trackable.getName().equalsIgnoreCase("tarmac") ? 2
-                    : textureIndex;
-
-            // deal with the modelview and projection matrices
-            float[] modelViewProjection = new float[16];
-
-            if (!mActivity.isExtendedTrackingActive()) {
-                Matrix.translateM(modelViewMatrix, 0, 0.0f, 0.0f,
-                        OBJECT_SCALE_FLOAT);
-                Matrix.scaleM(modelViewMatrix, 0, OBJECT_SCALE_FLOAT,
-                        OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
-            } else {
-                Matrix.rotateM(modelViewMatrix, 0, 90.0f, 1.0f, 0, 0);
-                Matrix.scaleM(modelViewMatrix, 0, kBuildingScale,
-                        kBuildingScale, kBuildingScale);
-            }
-            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelViewMatrix, 0);
-
-            // activate the shader program and bind the vertex/normal/tex coords
-            GLES20.glUseProgram(shaderProgramID);
-
-            if (!mActivity.isExtendedTrackingActive()) {
-                GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
-                        false, 0, mTeapot.getVertices());
-                GLES20.glVertexAttribPointer(textureCoordHandle, 2,
-                        GLES20.GL_FLOAT, false, 0, mTeapot.getTexCoords());
-
-                GLES20.glEnableVertexAttribArray(vertexHandle);
-                GLES20.glEnableVertexAttribArray(textureCoordHandle);
-
-                // activate texture 0, bind it, and pass to shader
-                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
-                        mTextures.get(textureIndex).mTextureID[0]);
-                GLES20.glUniform1i(texSampler2DHandle, 0);
-
-                // pass the model view matrix to the shader
-                GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
-                        modelViewProjection, 0);
-
-                // finally draw the teapot
-                GLES20.glDrawElements(GLES20.GL_TRIANGLES,
-                        mTeapot.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
-                        mTeapot.getIndices());
-
-                // disable the enabled arrays
-                GLES20.glDisableVertexAttribArray(vertexHandle);
-                GLES20.glDisableVertexAttribArray(textureCoordHandle);
-            } else {
-                GLES20.glDisable(GLES20.GL_CULL_FACE);
-                GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
-                        false, 0, mBuildingsModel.getVertices());
-                GLES20.glVertexAttribPointer(textureCoordHandle, 2,
-                        GLES20.GL_FLOAT, false, 0, mBuildingsModel.getTexCoords());
-
-                GLES20.glEnableVertexAttribArray(vertexHandle);
-                GLES20.glEnableVertexAttribArray(textureCoordHandle);
-
-                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
-                        mTextures.get(3).mTextureID[0]);
-                GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
-                        modelViewProjection, 0);
-                GLES20.glUniform1i(texSampler2DHandle, 0);
-                GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,
-                        mBuildingsModel.getNumObjectVertex());
-
-                SampleUtils.checkGLError("Renderer DrawBuildings");
-            }
-
-            SampleUtils.checkGLError("Render Frame");
-
-        }
-
-        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
     }
 
