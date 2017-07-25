@@ -18,6 +18,7 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.hardware.SensorEventListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +29,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -52,10 +54,19 @@ import com.vuforia.samples.VuforiaSamples.ui.SampleAppMenu.SampleAppMenu;
 import com.vuforia.samples.VuforiaSamples.ui.SampleAppMenu.SampleAppMenuGroup;
 import com.vuforia.samples.VuforiaSamples.ui.SampleAppMenu.SampleAppMenuInterface;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 
 public class PicassoMainActivity extends Activity implements SampleApplicationControl,
-        SampleAppMenuInterface
+        SampleAppMenuInterface, SensorEventListener
 {
+
+    private SensorManager mSensorManager;
+    Sensor accelerometer;
+    Sensor magnetometer;
+
     private static final String LOGTAG = "PicassoMainActivity";
 
     SampleApplicationSession vuforiaAppSession;
@@ -82,7 +93,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
     private SampleAppMenu mSampleAppMenu;
 
-    LoadingDialogHandler loadingDialogHandler = new LoadingDialogHandler(this);
+    //LoadingDialogHandler loadingDialogHandler = new LoadingDialogHandler(this);
 
     // Alert Dialog used to display SDK errors
     private AlertDialog mErrorDialog;
@@ -103,7 +114,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         startLoadingAnimation();
 
         vuforiaAppSession
-                .initAR(this, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                .initAR(this, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         // Load any sample specific textures:
         mTextures = new Vector<Texture>();
@@ -114,6 +125,10 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         mIsDroidDevice = android.os.Build.MODEL.toLowerCase().startsWith(
                 "droid");
 
+        // Register the sensor listeners
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
     }
 
 
@@ -192,6 +207,9 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
             mGlView.onResume();
         }
 
+
+        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
     }
 
 
@@ -239,6 +257,8 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         {
             Log.e(LOGTAG, e.getString());
         }
+
+        mSensorManager.unregisterListener(this);
     }
 
 
@@ -286,19 +306,19 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     private void startLoadingAnimation()
     {
         LayoutInflater inflater = LayoutInflater.from(this);
-        mUILayout = (RelativeLayout) inflater.inflate(R.layout.camera_overlay,
+        mUILayout = (RelativeLayout) inflater.inflate(R.layout.picasso_main_layout,
                 null, false);
 
         mUILayout.setVisibility(View.VISIBLE);
         mUILayout.setBackgroundColor(Color.BLACK);
 
-        // Gets a reference to the loading dialog
+        /*// Gets a reference to the loading dialog
         loadingDialogHandler.mLoadingDialogContainer = mUILayout
                 .findViewById(R.id.loading_indicator);
 
         // Shows the loading indicator at start
         loadingDialogHandler
-                .sendEmptyMessage(LoadingDialogHandler.SHOW_LOADING_DIALOG);
+                .sendEmptyMessage(LoadingDialogHandler.SHOW_LOADING_DIALOG);*/
 
         // Adds the inflated layout to the view
         addContentView(mUILayout, new LayoutParams(LayoutParams.MATCH_PARENT,
@@ -663,5 +683,45 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     private void showToast(String text)
     {
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+    }
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+
+    Float azimut;// View to draw a compass
+    float[] mGravity;
+    float[] mGeomagnetic;
+    public void onSensorChanged(SensorEvent event)
+    {
+        try {
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                mGravity = event.values;
+            }
+
+            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                mGeomagnetic = event.values;
+            }
+
+            if (mGravity != null && mGeomagnetic != null) {
+                float Ri[] = new float[9];
+                float I[] = new float[9];
+                boolean success = SensorManager.getRotationMatrix(Ri, I, mGravity, mGeomagnetic);
+                if (success) {
+                    float orientation[] = new float[3];
+                    SensorManager.getOrientation(Ri, orientation);
+                    azimut = orientation[0]; // orientation contains: azimut, pitch and roll
+
+                    if (this.mUILayout != null) {
+                        ImageView imageView = (ImageView) this.mUILayout.findViewById(R.id.radar_image_imageView);
+                        imageView.setRotation((-azimut*360/(2*3.14159f)));
+                    }
+                }
+            }
+        }
+        catch(Exception ex) {
+            if (this.mUILayout != null) {
+                ImageView imageView = (ImageView) this.mUILayout.findViewById(R.id.radar_image_imageView);
+                imageView.setRotation(0);
+            }
+        }
     }
 }

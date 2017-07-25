@@ -169,9 +169,9 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
                 "opacity");
         colorHandle = GLES20.glGetUniformLocation(shaderProgramID, "color");
 
-        // Hide the Loading Dialog
+        /*// Hide the Loading Dialog
         mActivity.loadingDialogHandler
-                .sendEmptyMessage(LoadingDialogHandler.HIDE_LOADING_DIALOG);
+                .sendEmptyMessage(LoadingDialogHandler.HIDE_LOADING_DIALOG);*/
 
     }
 
