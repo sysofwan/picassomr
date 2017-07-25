@@ -42,6 +42,7 @@ import com.vuforia.STORAGE_TYPE;
 import com.vuforia.Trackable;
 import com.vuforia.Tracker;
 import com.vuforia.TrackerManager;
+import com.vuforia.VIEW;
 import com.vuforia.Vuforia;
 import com.vuforia.samples.SampleApplication.SampleApplicationControl;
 import com.vuforia.samples.SampleApplication.SampleApplicationException;
@@ -309,7 +310,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         mUILayout = (RelativeLayout) inflater.inflate(R.layout.picasso_main_layout,
                 null, false);
 
-        mUILayout.setVisibility(View.VISIBLE);
+        mUILayout.setVisibility(View.INVISIBLE);
         mUILayout.setBackgroundColor(Color.BLACK);
 
         /*// Gets a reference to the loading dialog
@@ -497,10 +498,46 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     }
 
 
+    public boolean showOverlays = false;
+
     @Override
     public void onVuforiaUpdate(State state)
     {
+        if(state.getNumTrackableResults() > 0)
+        {
+            if(showOverlays != true) {
+
+                final RelativeLayout layout = this.mUILayout;
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        layout.setVisibility(View.VISIBLE);
+                        layout.invalidate();
+                        showOverlays = true;
+                    }
+                });
+            }
+        }
+        else
+        {
+            if(showOverlays != false)
+            {
+                final RelativeLayout layout = this.mUILayout;
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        layout.setVisibility(View.INVISIBLE);
+                        showOverlays = false;
+                    }
+                });
+            }
+        }
     }
+
+
+
 
 
     @Override
