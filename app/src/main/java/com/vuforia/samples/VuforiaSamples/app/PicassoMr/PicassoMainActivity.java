@@ -121,8 +121,8 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     // for rendering.
     private void loadTextures()
     {
-        mTextures.add(Texture.loadTextureFromApk(
-                "ObjectRecognition/CubeWireframe.png", getAssets()));
+        //mTextures.add(Texture.loadTextureFromApk("ObjectRecognition/CubeWireframe.png", getAssets()));
+        mTextures.add(Texture.loadTextureFromApk("gray.png", getAssets()));
     }
 
 

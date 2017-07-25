@@ -14,6 +14,18 @@ import java.nio.Buffer;
 
 public class CubeObject extends MeshObject
 {
+
+    public CubeObject(double[] vertArray, double[] texCoordArray, double[] normArray, short[] indArray)
+    {
+        mVertBuff = fillBuffer(vertArray);
+        mTexCoordBuff = fillBuffer(texCoordArray);
+        mNormBuff = fillBuffer(normArray);
+        mIndBuff = fillBuffer(indArray);
+
+        verticesNumber = vertArray.length / 3;
+        indicesNumber = indArray.length;
+    }
+
     // Data for drawing the 3D plane as overlay
     private static final double cubeVertices[]  = { 
             -1.00f, -1.00f, 1.00f, // front
@@ -88,6 +100,9 @@ public class CubeObject extends MeshObject
     private Buffer mTexCoordBuff;
     private Buffer mNormBuff;
     private Buffer mIndBuff;
+
+    private int indicesNumber = 0;
+    private int verticesNumber = 0;
     
     
     public CubeObject()
@@ -126,13 +141,15 @@ public class CubeObject extends MeshObject
     @Override
     public int getNumObjectVertex()
     {
-        return cubeVertices.length / 3;
+        //return cubeVertices.length / 3;
+        return verticesNumber;
     }
     
     
     @Override
     public int getNumObjectIndex()
     {
-        return cubeIndices.length;
+        //return cubeIndices.length;
+        return indicesNumber;
     }
 }
