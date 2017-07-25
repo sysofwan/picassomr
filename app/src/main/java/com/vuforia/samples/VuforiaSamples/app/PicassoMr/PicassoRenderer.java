@@ -42,6 +42,8 @@ import com.vuforia.samples.SampleApplication.SampleAppRendererControl;
 import com.vuforia.samples.SampleApplication.SampleApplicationSession;
 import com.vuforia.samples.SampleApplication.utils.CubeObject;
 import com.vuforia.samples.SampleApplication.utils.CubeShaders;
+import com.vuforia.samples.SampleApplication.utils.MyMath;
+import com.vuforia.samples.SampleApplication.utils.ObjLoader;
 import com.vuforia.samples.SampleApplication.utils.LoadingDialogHandler;
 import com.vuforia.samples.SampleApplication.utils.SampleUtils;
 import com.vuforia.samples.SampleApplication.utils.Texture;
@@ -64,6 +66,10 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
     private int mvpMatrixHandle;
     private int opacityHandle;
     private int colorHandle;
+
+    private int transformationMatrixHandle;
+    private int lightPositionVectorHandle;
+    private int lightColorVectorHandle;
 
     private CubeObject mCubeObject;
 
@@ -139,7 +145,8 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
     // Function for initializing the renderer.
     private void initRendering()
     {
-        mCubeObject = new CubeObject();
+        //mCubeObject = new CubeObject();
+        mCubeObject = ObjLoader.loadCubeObjModel("MacBook Air", mActivity.getAssets());
 
         mRenderer = Renderer.getInstance();
 
@@ -177,9 +184,19 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
                 "opacity");
         colorHandle = GLES20.glGetUniformLocation(shaderProgramID, "color");
 
+        transformationMatrixHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "transformationMatrix");
+        texSampler2DHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "texSampler2D");
+        lightPositionVectorHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "lightPosition");
+        lightColorVectorHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "lightColor");
+
         // Hide the Loading Dialog
+        /*// Hide the Loading Dialog
         mActivity.loadingDialogHandler
-                .sendEmptyMessage(LoadingDialogHandler.HIDE_LOADING_DIALOG);
+                .sendEmptyMessage(LoadingDialogHandler.HIDE_LOADING_DIALOG);*/
 
     }
 
@@ -198,7 +215,8 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
-
+        float[] lightPosition = new Vec3F(0, 0, -20).getData();
+        float[] lightColor = new Vec3F(1,1,1).getData();
 
         // did we find any trackables this frame?
         for (int tIdx = 0; tIdx < state.getNumTrackableResults(); tIdx++)
@@ -221,11 +239,15 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
 
             float[] objectSize = objectTarget.getSize().getData();
 
-            Matrix.translateM(modelViewMatrix, 0, objectSize[0]/2, objectSize[1]/2,
-                    objectSize[2]/2);
+            float[] transformationData = MyMath.createTransformationMatrix(new Vec3F(0f, 0f, 0f), 0f, 0f, 0f, 1);
 
-            Matrix.scaleM(modelViewMatrix, 0, objectSize[0]/2,
-                    objectSize[1]/2, objectSize[2]/2);
+            float[] invTransformationData = MyMath.invert(transformationData);
+
+            float[] modelViewTransformation = new float[16];
+            //Matrix.multiplyMM(modelViewTransformation, 0, modelViewMatrix, 0, transformationData, 0);
+
+            modelViewMatrix = MyMath.fixingLaptopPosition(modelViewMatrix);
+            modelViewMatrix = MyMath.moveHorizontalPosition(modelViewMatrix, objectSize[0]*2*-1);
 
             Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
@@ -249,10 +271,14 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
                     modelViewProjection, 0);
             GLES20.glUniform1i(texSampler2DHandle, 0);
 
+            GLES20.glUniform3fv(lightPositionVectorHandle, 1, lightPosition, 0);
+            GLES20.glUniform3fv(lightColorVectorHandle, 1, lightColor, 0);
 
             // pass the model view matrix to the shader
             GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
                     modelViewProjection, 0);
+            GLES20.glUniformMatrix4fv(transformationMatrixHandle, 1, false,
+                    transformationData, 0);
 
             // finally render
             GLES20.glDrawElements(GLES20.GL_TRIANGLES,
