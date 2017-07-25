@@ -24,6 +24,19 @@ public class Teapot extends MeshObject
     private int verticesNumber = 0;
     
     
+    public Teapot(double[] vertArray, double[] texCoordArray, double[] normArray, short[] indArray)
+    {
+        mVertBuff = fillBuffer(vertArray);
+        verticesNumber = vertArray.length / 3;
+
+        mTexCoordBuff = fillBuffer(texCoordArray);
+
+        mNormBuff = fillBuffer(normArray);
+
+        mIndBuff = fillBuffer(indArray);
+        indicesNumber = indArray.length;
+    }
+
     public Teapot()
     {
         setVerts();
@@ -32,7 +45,7 @@ public class Teapot extends MeshObject
         setIndices();
     }
     
-    
+
     private void setVerts()
     {
         double[] TEAPOT_VERTS = { 11.222200, 0.110300, 20.030291, 10.302300,
@@ -1455,6 +1468,7 @@ public class Teapot extends MeshObject
         mIndBuff = fillBuffer(TEAPOT_INDICES);
         indicesNumber = TEAPOT_INDICES.length;
     }
+
     
     
     public int getNumObjectIndex()

@@ -14,11 +14,15 @@ import java.util.Vector;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.res.Configuration;
+import android.graphics.Point;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
+import com.vuforia.CameraCalibration;
+import com.vuforia.CameraDevice;
 import com.vuforia.Device;
 import com.vuforia.Matrix44F;
 import com.vuforia.ObjectTarget;
@@ -28,12 +32,18 @@ import com.vuforia.State;
 import com.vuforia.Tool;
 import com.vuforia.Trackable;
 import com.vuforia.TrackableResult;
+import com.vuforia.Vec2F;
+import com.vuforia.Vec3F;
+import com.vuforia.VideoBackgroundConfig;
+import com.vuforia.VideoMode;
 import com.vuforia.Vuforia;
 import com.vuforia.samples.SampleApplication.SampleAppRenderer;
 import com.vuforia.samples.SampleApplication.SampleAppRendererControl;
 import com.vuforia.samples.SampleApplication.SampleApplicationSession;
 import com.vuforia.samples.SampleApplication.utils.CubeObject;
 import com.vuforia.samples.SampleApplication.utils.CubeShaders;
+import com.vuforia.samples.SampleApplication.utils.MyMath;
+import com.vuforia.samples.SampleApplication.utils.ObjLoader;
 import com.vuforia.samples.SampleApplication.utils.LoadingDialogHandler;
 import com.vuforia.samples.SampleApplication.utils.SampleUtils;
 import com.vuforia.samples.SampleApplication.utils.Texture;
@@ -56,6 +66,10 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
     private int mvpMatrixHandle;
     private int opacityHandle;
     private int colorHandle;
+
+    private int transformationMatrixHandle;
+    private int lightPositionVectorHandle;
+    private int lightColorVectorHandle;
 
     private CubeObject mCubeObject;
 
@@ -131,7 +145,8 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
     // Function for initializing the renderer.
     private void initRendering()
     {
-        mCubeObject = new CubeObject();
+        //mCubeObject = new CubeObject();
+        mCubeObject = ObjLoader.loadCubeObjModel("MacBook Air", mActivity.getAssets());
 
         mRenderer = Renderer.getInstance();
 
@@ -169,6 +184,16 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
                 "opacity");
         colorHandle = GLES20.glGetUniformLocation(shaderProgramID, "color");
 
+        transformationMatrixHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "transformationMatrix");
+        texSampler2DHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "texSampler2D");
+        lightPositionVectorHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "lightPosition");
+        lightColorVectorHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "lightColor");
+
+        // Hide the Loading Dialog
         /*// Hide the Loading Dialog
         mActivity.loadingDialogHandler
                 .sendEmptyMessage(LoadingDialogHandler.HIDE_LOADING_DIALOG);*/
@@ -189,6 +214,9 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
         GLES20.glEnable(GLES20.GL_CULL_FACE);
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+        float[] lightPosition = new Vec3F(0, 0, -20).getData();
+        float[] lightColor = new Vec3F(1,1,1).getData();
 
         // did we find any trackables this frame?
         for (int tIdx = 0; tIdx < state.getNumTrackableResults(); tIdx++)
@@ -211,13 +239,14 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
 
             float[] objectSize = objectTarget.getSize().getData();
 
-            Matrix.translateM(modelViewMatrix, 0, objectSize[0]/2, objectSize[1]/2,
-                    objectSize[2]/2);
+            float[] transformationData = MyMath.createTransformationMatrix(new Vec3F(0f, 0f, 0.0f), 75f, 95f, -30f, objectSize[1]/100f);
 
-            Matrix.scaleM(modelViewMatrix, 0, objectSize[0]/2,
-                    objectSize[1]/2, objectSize[2]/2);
+            float[] invTransformationData = MyMath.invert(transformationData);
 
-            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelViewMatrix, 0);
+            float[] modelViewTransformation = new float[16];
+            Matrix.multiplyMM(modelViewTransformation, 0, modelViewMatrix, 0, transformationData, 0);
+
+            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelViewTransformation, 0);
 
             // activatrigidBodyTarget.xmle the shader program and bind the vertex/normal/tex coords
             GLES20.glUseProgram(shaderProgramID);
@@ -239,10 +268,14 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
                     modelViewProjection, 0);
             GLES20.glUniform1i(texSampler2DHandle, 0);
 
+            GLES20.glUniform3fv(lightPositionVectorHandle, 1, lightPosition, 0);
+            GLES20.glUniform3fv(lightColorVectorHandle, 1, lightColor, 0);
 
             // pass the model view matrix to the shader
             GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
                     modelViewProjection, 0);
+            GLES20.glUniformMatrix4fv(transformationMatrixHandle, 1, false,
+                    transformationData, 0);
 
             // finally render
             GLES20.glDrawElements(GLES20.GL_TRIANGLES,
@@ -275,6 +308,37 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
     {
         mTextures = textures;
 
+    }
+
+    private Vec2F getScreenCoor(TrackableResult result) {
+        CameraCalibration cameraCalibaration = CameraDevice.getInstance().getCameraCalibration();
+
+        Vec2F cameraPoint = Tool.projectPoint(cameraCalibaration, result.getPose(), new Vec3F(0, 0, 0));
+
+        return cameraToScreenPoint(cameraPoint);
+    }
+
+    private Vec2F cameraToScreenPoint(Vec2F cameraPoint) {
+        VideoMode videoMode = CameraDevice.getInstance().getVideoMode(CameraDevice.MODE.MODE_DEFAULT);
+        VideoBackgroundConfig backgroundConfig = Renderer.getInstance().getVideoBackgroundConfig();
+
+        Point size = new Point();
+        mActivity.getWindowManager().getDefaultDisplay().getRealSize(size);
+
+        int xOffset = (size.x - backgroundConfig.getSize().getData()[0])/2 + backgroundConfig.getPosition().getData()[0];
+        int yOffset = (size.y - backgroundConfig.getSize().getData()[1])/2 - backgroundConfig.getPosition().getData()[1];
+
+        Configuration config = mActivity.getResources().getConfiguration();
+        if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            int rotatedX = videoMode.getHeight() - (int)cameraPoint.getData()[1];
+            int rotatedY = (int)cameraPoint.getData()[0];
+
+            return new Vec2F(rotatedX * backgroundConfig.getSize().getData()[0] / (float) videoMode.getHeight() + xOffset,
+                    rotatedY * backgroundConfig.getSize().getData()[1] / (float) videoMode.getWidth() + yOffset);
+        }
+
+        return new Vec2F(cameraPoint.getData()[0] * backgroundConfig.getSize().getData()[0] / (float) videoMode.getWidth() + xOffset,
+                cameraPoint.getData()[1] * backgroundConfig.getSize().getData()[1] / (float) videoMode.getHeight() + yOffset);
     }
 
 }

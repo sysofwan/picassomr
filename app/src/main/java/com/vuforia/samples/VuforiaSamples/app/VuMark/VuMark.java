@@ -186,8 +186,7 @@ public class VuMark extends Activity implements SampleApplicationControl,
     
     private void loadTextures()
     {
-        mTextures.add(Texture.loadTextureFromApk("vumark_texture.png",
-                getAssets()));
+        mTextures.add(Texture.loadTextureFromApk("vumark_texture.png", getAssets()));
     }
     
     
