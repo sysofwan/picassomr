@@ -45,6 +45,7 @@ import com.vuforia.samples.SampleApplication.SampleApplicationControl;
 import com.vuforia.samples.SampleApplication.SampleApplicationException;
 import com.vuforia.samples.SampleApplication.SampleApplicationSession;
 import com.vuforia.samples.SampleApplication.utils.LoadingDialogHandler;
+import com.vuforia.samples.SampleApplication.utils.MyTouch;
 import com.vuforia.samples.SampleApplication.utils.SampleApplicationGLView;
 import com.vuforia.samples.SampleApplication.utils.Texture;
 import com.vuforia.samples.VuforiaSamples.R;
@@ -88,6 +89,8 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     private AlertDialog mErrorDialog;
 
     boolean mIsDroidDevice = false;
+
+    MyTouch mTouch;
 
 
     // Called when the activity first starts or the user navigates back to an
@@ -416,9 +419,11 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
             if (result)
                 Log.e(LOGTAG, "Unable to enable continuous autofocus");
 
-            mSampleAppMenu = new SampleAppMenu(this, this, "Object Reco",
+            mSampleAppMenu = new SampleAppMenu(this, this, "PicassoMR",
                     mGlView, mUILayout, null);
             setSampleAppMenuSettings();
+
+            mTouch = new MyTouch();
 
         } else
         {
@@ -576,8 +581,8 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     {
         SampleAppMenuGroup group;
 
-        group = mSampleAppMenu.addGroup("", false);
-        group.addTextItem(getString(R.string.menu_back), -1);
+        //group = mSampleAppMenu.addGroup("", false);
+        //group.addTextItem(getString(R.string.menu_back), -1);
 
         group = mSampleAppMenu.addGroup("", true);
         group.addSelectionItem(getString(R.string.menu_extended_tracking),

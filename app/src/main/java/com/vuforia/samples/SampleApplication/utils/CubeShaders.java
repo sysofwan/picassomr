@@ -11,7 +11,7 @@ package com.vuforia.samples.SampleApplication.utils;
 
 public class CubeShaders
 {
-    /*
+
     // old
     public static final String CUBE_MESH_VERTEX_SHADER = " \n" + "\n"
         + "attribute vec4 vertexPosition; \n"
@@ -31,8 +31,8 @@ public class CubeShaders
             + "void main() \n"
             + "{ \n" + "   gl_FragColor = texture2D(texSampler2D, texCoord); \n"
             + "} \n";
-    */
 
+    /*
     public static final String CUBE_MESH_VERTEX_SHADER = " \n" + "\n"
             + "attribute vec4 vertexPosition; \n"
             + "attribute vec2 vertexTexCoord; \n"
@@ -45,7 +45,7 @@ public class CubeShaders
             + "uniform mat4 modelViewProjectionMatrix; \n" + "\n"
             + "uniform vec3 lightPosition; \n" + "\n"
             + "void main() \n" + "{ \n"
-            + "   vec4 worldPosition = transformationMatrix * vertexPosition; \n"
+            //+ "   vec4 worldPosition = transformationMatrix * vertexPosition; \n"
             + "   gl_Position = modelViewProjectionMatrix * worldPosition; \n"
             + "   texCoord = vertexTexCoord; \n"
             //+ "   surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz; \n"
@@ -71,5 +71,5 @@ public class CubeShaders
             //+ "   gl_FragColor = vec4(diffuse, 1.0) * texture2D(texSampler2D, texCoord) * vec4(lightColor, 1.0); \n"
             + "   gl_FragColor = texture2D(texSampler2D, texCoord); \n"
             + "} \n";
-
+    */
 }
