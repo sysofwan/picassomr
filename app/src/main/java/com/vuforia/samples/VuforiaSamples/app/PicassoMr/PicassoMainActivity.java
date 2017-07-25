@@ -28,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -42,12 +43,10 @@ import com.vuforia.STORAGE_TYPE;
 import com.vuforia.Trackable;
 import com.vuforia.Tracker;
 import com.vuforia.TrackerManager;
-import com.vuforia.VIEW;
 import com.vuforia.Vuforia;
 import com.vuforia.samples.SampleApplication.SampleApplicationControl;
 import com.vuforia.samples.SampleApplication.SampleApplicationException;
 import com.vuforia.samples.SampleApplication.SampleApplicationSession;
-import com.vuforia.samples.SampleApplication.utils.LoadingDialogHandler;
 import com.vuforia.samples.SampleApplication.utils.SampleApplicationGLView;
 import com.vuforia.samples.SampleApplication.utils.Texture;
 import com.vuforia.samples.VuforiaSamples.R;
@@ -57,12 +56,13 @@ import com.vuforia.samples.VuforiaSamples.ui.SampleAppMenu.SampleAppMenuInterfac
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 public class PicassoMainActivity extends Activity implements SampleApplicationControl,
         SampleAppMenuInterface, SensorEventListener
 {
+
+    private boolean isCompareMode = false;
 
     private SensorManager mSensorManager;
     Sensor accelerometer;
@@ -130,6 +130,12 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        // Capture our button from layout
+        Button button = (Button)findViewById(R.id.compare_button);
+        // Register the onClick listener with the implementation above
+        button.setOnClickListener(compareButtonListener);
+
     }
 
 
@@ -505,7 +511,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     {
         if(state.getNumTrackableResults() > 0)
         {
-            if(showOverlays != true) {
+            if(showOverlays != true && isCompareMode == false) {
 
                 final RelativeLayout layout = this.mUILayout;
 
@@ -514,6 +520,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
                     public void run() {
                         layout.setVisibility(View.VISIBLE);
                         layout.invalidate();
+                        layout.requestLayout();
                         showOverlays = true;
                     }
                 });
@@ -535,10 +542,6 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
             }
         }
     }
-
-
-
-
 
     @Override
     public boolean doInitTrackers()
@@ -759,6 +762,33 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
                 ImageView imageView = (ImageView) this.mUILayout.findViewById(R.id.radar_image_imageView);
                 imageView.setRotation(0);
             }
+        }
+    }
+
+    private View.OnClickListener compareButtonListener = new View.OnClickListener()
+    {
+        public void onClick(View v) {
+
+            isCompareMode = true;
+            mRenderer.enableRenderObject();
+            final RelativeLayout layout = mUILayout;
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    layout.setVisibility(View.INVISIBLE);
+                    showOverlays = false;
+                }
+            });
+        }
+    };
+
+    @Override
+    public void onBackPressed() {
+        if(isCompareMode)
+        {
+            isCompareMode = false;
+            mRenderer.disableRenderObject();
         }
     }
 }

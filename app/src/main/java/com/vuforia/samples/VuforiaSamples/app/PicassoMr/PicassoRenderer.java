@@ -52,6 +52,8 @@ import com.vuforia.samples.SampleApplication.utils.Texture;
 // The renderer class for the ImageTargets sample.
 public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendererControl
 {
+    private boolean renderObject = false;
+
     private static final String LOGTAG = "ObjectTargetRenderer";
 
     private SampleApplicationSession vuforiaAppSession;
@@ -200,6 +202,15 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
 
     }
 
+    public void enableRenderObject()
+    {
+        renderObject = true;
+    }
+
+    public void disableRenderObject()
+    {
+        renderObject = false;
+    }
 
     // The render function called from SampleAppRendering by using RenderingPrimitives views.
     // The state is owned by SampleAppRenderer which is controlling it's lifecycle.
@@ -277,10 +288,12 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
             GLES20.glUniformMatrix4fv(transformationMatrixHandle, 1, false,
                     transformationData, 0);
 
-            // finally render
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+            if(renderObject == true)
+            {
+                GLES20.glDrawElements(GLES20.GL_TRIANGLES,
                     mCubeObject.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
                     mCubeObject.getIndices());
+            }
 
             // disable the enabled arrays
             GLES20.glDisableVertexAttribArray(vertexHandle);
