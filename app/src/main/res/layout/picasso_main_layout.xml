@@ -4,13 +4,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <TextView
+        android:id="@+id/comparisonText"
+        android:layout_width="wrap_content"
+        android:layout_height="26dp"
+        android:text="Comparison"
+        android:textSize="25sp"
+        android:textColor="@color/white"
+        android:visibility="invisible"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        />
+
     <Button
         android:id="@+id/buy_button"
         android:text="Buy"
         android:layout_width="100dp"
         android:layout_height="50dp"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        android:visibility="invisible">
     </Button>
     <Button
         android:id="@+id/compare_button"
@@ -18,7 +31,8 @@
         android:layout_width="100dp"
         android:layout_height="50dp"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        android:visibility="invisible">
     </Button>
     <ImageView
         android:id="@+id/radar_image_imageView"
@@ -26,15 +40,19 @@
         android:layout_height="100dp"
         android:src="@drawable/radar_map"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true" >
+        android:layout_alignParentRight="true"
+        android:visibility="invisible">
     </ImageView>
 
     <LinearLayout
+        android:id="@+id/ratings_reviews"
         android:layout_width="150dp"
         android:layout_height="200dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="#80444444"
+        android:visibility="invisible">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -43,13 +61,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:text="4/5"
-                android:textSize="20sp"
-                android:textColor="@color/light_gray"/>
+                android:textSize="16sp"
+                android:textColor="@color/abc_search_url_text_normal"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:text="Nice product"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textColor="@color/white"/>
         </LinearLayout>
         <LinearLayout
@@ -60,13 +78,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:text="3/5"
-                android:textSize="20sp"
-                android:textColor="@color/light_gray"/>
+                android:textSize="16sp"
+                android:textColor="@color/abc_search_url_text_normal"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:text="Cool long revie..."
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:textColor="@color/white"/>
         </LinearLayout>
         <LinearLayout
@@ -77,13 +95,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:text="1/5"
-                android:textSize="20sp"
-                android:textColor="@color/light_gray"/>
+                android:textSize="16sp"
+                android:textColor="@color/abc_search_url_text_normal"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
                 android:text="Don't like it"
-                android:textSize="20sp"
+                android:textSize="16sp"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:text="1/5"
+                android:textSize="16sp"
+                android:textColor="@color/abc_search_url_text_normal"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:text="Don't like it"
+                android:textSize="16sp"
                 android:textColor="@color/white"/>
         </LinearLayout>
     </LinearLayout>

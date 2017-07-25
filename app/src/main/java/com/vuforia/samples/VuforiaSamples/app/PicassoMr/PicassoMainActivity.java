@@ -28,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -321,7 +322,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         mUILayout = (RelativeLayout) inflater.inflate(R.layout.picasso_main_layout,
                 null, false);
 
-        mUILayout.setVisibility(View.INVISIBLE);
+        mUILayout.setVisibility(View.VISIBLE);
         mUILayout.setBackgroundColor(Color.BLACK);
 
         /*// Gets a reference to the loading dialog
@@ -522,42 +523,15 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         if(state.getNumTrackableResults() > 0)
         {
             if(showOverlays != true && isCompareMode == false) {
-
-                final RelativeLayout layout = this.mUILayout;
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        layout.setVisibility(View.VISIBLE);
-                        layout.invalidate();
-                        layout.requestLayout();
-                        showOverlays = true;
-                    }
-                });
+                showOverlays(state);
             }
         }
         else
         {
             if(showOverlays != false)
             {
-                final RelativeLayout layout = this.mUILayout;
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        layout.setVisibility(View.INVISIBLE);
-                        showOverlays = false;
-                    }
-                });
+                hideOverlays();
             }
-        }
-
-        if (state.getNumTrackableResults() == 0) {
-            mCanvasOverlay.updateTrackable(null);
-        }
-
-        else {
-            mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
         }
     }
 
@@ -789,13 +763,15 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
             isCompareMode = true;
             mRenderer.enableRenderObject();
-            final RelativeLayout layout = mUILayout;
+
+            hideOverlays();
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    layout.setVisibility(View.INVISIBLE);
-                    showOverlays = false;
+                    View comparisonText = mUILayout.findViewById(R.id.comparisonText);
+
+                    comparisonText.setVisibility(View.VISIBLE);
                 }
             });
         }
@@ -807,6 +783,57 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         {
             isCompareMode = false;
             mRenderer.disableRenderObject();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    View comparisonText = mUILayout.findViewById(R.id.comparisonText);
+
+                    comparisonText.setVisibility(View.INVISIBLE);
+                }
+            });
         }
+    }
+
+    private void hideOverlays()
+    {
+        mCanvasOverlay.updateTrackable(null);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                View radar = mUILayout.findViewById(R.id.radar_image_imageView);
+                View ratingAndReviews = mUILayout.findViewById(R.id.ratings_reviews);
+                View buyButton = mUILayout.findViewById(R.id.buy_button);
+                View compareButton = mUILayout.findViewById(R.id.compare_button);
+
+                radar.setVisibility(View.INVISIBLE);
+                ratingAndReviews.setVisibility(View.INVISIBLE);
+                buyButton.setVisibility(View.INVISIBLE);
+                compareButton.setVisibility(View.INVISIBLE);
+                showOverlays = false;
+            }
+        });
+    }
+
+    private void showOverlays(State state)
+    {
+        mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                View radar = mUILayout.findViewById(R.id.radar_image_imageView);
+                View ratingAndReviews = mUILayout.findViewById(R.id.ratings_reviews);
+                View buyButton = mUILayout.findViewById(R.id.buy_button);
+                View compareButton = mUILayout.findViewById(R.id.compare_button);
+
+                radar.setVisibility(View.VISIBLE);
+                ratingAndReviews.setVisibility(View.VISIBLE);
+                buyButton.setVisibility(View.VISIBLE);
+                compareButton.setVisibility(View.VISIBLE);
+                showOverlays = true;
+            }
+        });
     }
 }
