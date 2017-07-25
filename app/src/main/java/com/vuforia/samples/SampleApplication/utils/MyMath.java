@@ -39,6 +39,13 @@ public class MyMath {
         return modelMatrix;
     }
 
+    public static float[] rotateObject(float[] modelMatrix, float rx, float ry)
+    {
+        Matrix.rotateM(modelMatrix, 0, ry, 0, 1, 0);
+        Matrix.rotateM(modelMatrix, 0, rx, 1, 0, 0);
+        return modelMatrix;
+    }
+
     public static float[] invert(float[] viewMatrix)
     {
         float[] invViewMatrix = new float[4*4];

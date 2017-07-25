@@ -218,15 +218,23 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
         float[] lightPosition = new Vec3F(0, 0, -20).getData();
         float[] lightColor = new Vec3F(1,1,1).getData();
 
+        if (state.getNumTrackableResults() == 0)
+        {
+            mActivity.mTouch.reset();
+        }
+
         // did we find any trackables this frame?
         for (int tIdx = 0; tIdx < state.getNumTrackableResults(); tIdx++)
         {
             TrackableResult result = state.getTrackableResult(tIdx);
             Trackable trackable = result.getTrackable();
-            printUserData(trackable);
+            //printUserData(trackable);
 
-            if (!result.isOfType(ObjectTargetResult.getClassType()))
+            if (!result.isOfType(ObjectTargetResult.getClassType())) {
                 continue;
+            }
+
+            float[] centerPoint = this.getScreenCoor(result).getData();
 
             ObjectTarget objectTarget = (ObjectTarget) trackable;
 
@@ -239,6 +247,8 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
 
             float[] objectSize = objectTarget.getSize().getData();
 
+            //mActivity.mTouch.setCenter(centerPoint[0], centerPoint[1], objectSize[0], objectSize[1]);
+
             float[] transformationData = MyMath.createTransformationMatrix(new Vec3F(0f, 0f, 0f), 0f, 0f, 0f, 1);
 
             float[] invTransformationData = MyMath.invert(transformationData);
@@ -248,6 +258,8 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
 
             modelViewMatrix = MyMath.fixingLaptopPosition(modelViewMatrix);
             modelViewMatrix = MyMath.moveHorizontalPosition(modelViewMatrix, objectSize[0]*2*-1);
+
+            modelViewMatrix = MyMath.rotateObject(modelViewMatrix, mActivity.mTouch.getRx(), mActivity.mTouch.getRy());
 
             Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
