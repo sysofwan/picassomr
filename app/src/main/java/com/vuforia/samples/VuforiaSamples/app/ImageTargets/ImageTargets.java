@@ -51,6 +51,7 @@ import com.vuforia.samples.SampleApplication.utils.LoadingDialogHandler;
 import com.vuforia.samples.SampleApplication.utils.SampleApplicationGLView;
 import com.vuforia.samples.SampleApplication.utils.Texture;
 import com.vuforia.samples.VuforiaSamples.R;
+import com.vuforia.samples.VuforiaSamples.app.PicassoMr.CanvasOverlayView;
 import com.vuforia.samples.VuforiaSamples.ui.SampleAppMenu.SampleAppMenu;
 import com.vuforia.samples.VuforiaSamples.ui.SampleAppMenu.SampleAppMenuGroup;
 import com.vuforia.samples.VuforiaSamples.ui.SampleAppMenu.SampleAppMenuInterface;
@@ -71,10 +72,11 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
     
     // Our OpenGL view:
     private SampleApplicationGLView mGlView;
-    
+    private CanvasOverlayView mCanvasOverlay;
+
     // Our renderer:
     private ImageTargetRenderer mRenderer;
-    
+
     private GestureDetector mGestureDetector;
     
     // The textures we will use for rendering:
@@ -293,6 +295,8 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         mGlView = new SampleApplicationGLView(this);
         mGlView.init(translucent, depthSize, stencilSize);
 
+        mCanvasOverlay = new CanvasOverlayView(this);
+
         mRenderer = new ImageTargetRenderer(this, vuforiaAppSession);
         mRenderer.setTextures(mTextures);
         mGlView.setRenderer(mRenderer);
@@ -411,6 +415,9 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
             // background is configured.
             addContentView(mGlView, new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
+
+            addContentView(mCanvasOverlay, new LayoutParams(LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT));
             
             // Sets the UILayout to be drawn in front of the camera
             mUILayout.bringToFront();
@@ -501,6 +508,14 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
             
             doUnloadTrackersData();
             doLoadTrackersData();
+        }
+
+        if (state.getNumTrackableResults() == 0) {
+            mCanvasOverlay.updateTrackable(null);
+        }
+
+        else {
+            mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
         }
     }
     

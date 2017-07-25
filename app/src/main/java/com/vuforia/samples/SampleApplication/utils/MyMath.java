@@ -24,6 +24,21 @@ public class MyMath {
         return matrixData;
     }
 
+    public static float[] fixingLaptopPosition(float[] modelMatrix)
+    {
+        Matrix.rotateM(modelMatrix, 0, 180, 0, 1, 0);
+        Matrix.rotateM(modelMatrix, 0, -90, 1, 0, 0);
+        Matrix.translateM(modelMatrix, 0, 0, 0, -80);
+        Matrix.translateM(modelMatrix, 0, 0, -150, 0);
+        return modelMatrix;
+    }
+
+    public static float[] moveHorizontalPosition(float[] modelMatrix, float xPos)
+    {
+        Matrix.translateM(modelMatrix, 0, xPos, 0, 0);
+        return modelMatrix;
+    }
+
     public static float[] invert(float[] viewMatrix)
     {
         float[] invViewMatrix = new float[4*4];

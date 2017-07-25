@@ -28,7 +28,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -47,6 +46,8 @@ import com.vuforia.Vuforia;
 import com.vuforia.samples.SampleApplication.SampleApplicationControl;
 import com.vuforia.samples.SampleApplication.SampleApplicationException;
 import com.vuforia.samples.SampleApplication.SampleApplicationSession;
+import com.vuforia.samples.SampleApplication.utils.LoadingDialogHandler;
+import com.vuforia.samples.SampleApplication.utils.MyTouch;
 import com.vuforia.samples.SampleApplication.utils.SampleApplicationGLView;
 import com.vuforia.samples.SampleApplication.utils.Texture;
 import com.vuforia.samples.VuforiaSamples.R;
@@ -76,6 +77,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
     // Our OpenGL view:
     private SampleApplicationGLView mGlView;
+    private CanvasOverlayView mCanvasOverlay;
 
     // Our renderer:
     private PicassoRenderer mRenderer;
@@ -100,6 +102,8 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     private AlertDialog mErrorDialog;
 
     boolean mIsDroidDevice = false;
+
+    MyTouch mTouch;
 
 
     // Called when the activity first starts or the user navigates back to an
@@ -302,6 +306,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
         mGlView = new SampleApplicationGLView(this);
         mGlView.init(translucent, depthSize, stencilSize);
+        mCanvasOverlay = new CanvasOverlayView(this);
 
         mRenderer = new PicassoRenderer(this, vuforiaAppSession);
         mRenderer.setTextures(mTextures);
@@ -423,6 +428,9 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
             addContentView(mGlView, new LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT));
 
+            addContentView(mCanvasOverlay, new LayoutParams(LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT));
+
             // Sets the UILayout to be drawn in front of the camera
             mUILayout.bringToFront();
 
@@ -443,9 +451,11 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
             if (result)
                 Log.e(LOGTAG, "Unable to enable continuous autofocus");
 
-            mSampleAppMenu = new SampleAppMenu(this, this, "Object Reco",
+            mSampleAppMenu = new SampleAppMenu(this, this, "PicassoMR",
                     mGlView, mUILayout, null);
             setSampleAppMenuSettings();
+
+            mTouch = new MyTouch();
 
         } else
         {
@@ -540,6 +550,14 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
                     }
                 });
             }
+        }
+
+        if (state.getNumTrackableResults() == 0) {
+            mCanvasOverlay.updateTrackable(null);
+        }
+
+        else {
+            mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
         }
     }
 
@@ -636,8 +654,8 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     {
         SampleAppMenuGroup group;
 
-        group = mSampleAppMenu.addGroup("", false);
-        group.addTextItem(getString(R.string.menu_back), -1);
+        //group = mSampleAppMenu.addGroup("", false);
+        //group.addTextItem(getString(R.string.menu_back), -1);
 
         group = mSampleAppMenu.addGroup("", true);
         group.addSelectionItem(getString(R.string.menu_extended_tracking),

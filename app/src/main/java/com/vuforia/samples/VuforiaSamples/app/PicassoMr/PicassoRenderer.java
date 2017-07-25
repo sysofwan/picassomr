@@ -250,14 +250,17 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
 
             float[] objectSize = objectTarget.getSize().getData();
 
-            float[] transformationData = MyMath.createTransformationMatrix(new Vec3F(0f, 0f, 0.0f), 75f, 95f, -30f, objectSize[1]/100f);
+            float[] transformationData = MyMath.createTransformationMatrix(new Vec3F(0f, 0f, 0f), 0f, 0f, 0f, 1);
 
             float[] invTransformationData = MyMath.invert(transformationData);
 
             float[] modelViewTransformation = new float[16];
-            Matrix.multiplyMM(modelViewTransformation, 0, modelViewMatrix, 0, transformationData, 0);
+            //Matrix.multiplyMM(modelViewTransformation, 0, modelViewMatrix, 0, transformationData, 0);
 
-            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelViewTransformation, 0);
+            modelViewMatrix = MyMath.fixingLaptopPosition(modelViewMatrix);
+            modelViewMatrix = MyMath.moveHorizontalPosition(modelViewMatrix, objectSize[0]*2*-1);
+
+            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
             // activatrigidBodyTarget.xmle the shader program and bind the vertex/normal/tex coords
             GLES20.glUseProgram(shaderProgramID);
