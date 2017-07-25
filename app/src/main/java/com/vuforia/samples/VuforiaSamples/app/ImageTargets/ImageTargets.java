@@ -297,7 +297,7 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
 
         mCanvasOverlay = new CanvasOverlayView(this);
 
-        mRenderer = new ImageTargetRenderer(this, vuforiaAppSession, mCanvasOverlay);
+        mRenderer = new ImageTargetRenderer(this, vuforiaAppSession);
         mRenderer.setTextures(mTextures);
         mGlView.setRenderer(mRenderer);
     }

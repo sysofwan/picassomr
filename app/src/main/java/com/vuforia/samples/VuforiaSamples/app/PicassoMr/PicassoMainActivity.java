@@ -77,6 +77,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
     // Our OpenGL view:
     private SampleApplicationGLView mGlView;
+    private CanvasOverlayView mCanvasOverlay;
 
     // Our renderer:
     private PicassoRenderer mRenderer;
@@ -299,6 +300,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
         mGlView = new SampleApplicationGLView(this);
         mGlView.init(translucent, depthSize, stencilSize);
+        mCanvasOverlay = new CanvasOverlayView(this);
 
         mRenderer = new PicassoRenderer(this, vuforiaAppSession);
         mRenderer.setTextures(mTextures);
@@ -420,6 +422,9 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
             addContentView(mGlView, new LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT));
 
+            addContentView(mCanvasOverlay, new LayoutParams(LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT));
+
             // Sets the UILayout to be drawn in front of the camera
             mUILayout.bringToFront();
 
@@ -538,6 +543,14 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
                     }
                 });
             }
+        }
+
+        if (state.getNumTrackableResults() == 0) {
+            mCanvasOverlay.updateTrackable(null);
+        }
+
+        else {
+            mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
         }
     }
 

@@ -48,8 +48,6 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, SampleAppRen
     private ImageTargets mActivity;
     private SampleAppRenderer mSampleAppRenderer;
 
-    private CanvasOverlayView mOverlayView;
-
     private Vector<Texture> mTextures;
     
     private int shaderProgramID;
@@ -69,14 +67,13 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, SampleAppRen
     private static final float OBJECT_SCALE_FLOAT = 0.003f;
     
     
-    public ImageTargetRenderer(ImageTargets activity, SampleApplicationSession session, CanvasOverlayView overlayView)
+    public ImageTargetRenderer(ImageTargets activity, SampleApplicationSession session)
     {
         mActivity = activity;
         vuforiaAppSession = session;
         // SampleAppRenderer used to encapsulate the use of RenderingPrimitives setting
         // the device mode AR/VR and stereo mode
         mSampleAppRenderer = new SampleAppRenderer(this, mActivity, Device.MODE.MODE_AR, false, 0.01f , 5f);
-        mOverlayView = overlayView;
     }
     
     
