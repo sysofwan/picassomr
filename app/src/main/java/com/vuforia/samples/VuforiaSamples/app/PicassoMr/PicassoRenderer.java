@@ -14,11 +14,15 @@ import java.util.Vector;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.res.Configuration;
+import android.graphics.Point;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
+import com.vuforia.CameraCalibration;
+import com.vuforia.CameraDevice;
 import com.vuforia.Device;
 import com.vuforia.Matrix44F;
 import com.vuforia.ObjectTarget;
@@ -28,6 +32,10 @@ import com.vuforia.State;
 import com.vuforia.Tool;
 import com.vuforia.Trackable;
 import com.vuforia.TrackableResult;
+import com.vuforia.Vec2F;
+import com.vuforia.Vec3F;
+import com.vuforia.VideoBackgroundConfig;
+import com.vuforia.VideoMode;
 import com.vuforia.Vuforia;
 import com.vuforia.samples.SampleApplication.SampleAppRenderer;
 import com.vuforia.samples.SampleApplication.SampleAppRendererControl;
@@ -275,6 +283,37 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
     {
         mTextures = textures;
 
+    }
+
+    private Vec2F getScreenCoor(TrackableResult result) {
+        CameraCalibration cameraCalibaration = CameraDevice.getInstance().getCameraCalibration();
+
+        Vec2F cameraPoint = Tool.projectPoint(cameraCalibaration, result.getPose(), new Vec3F(0, 0, 0));
+
+        return cameraToScreenPoint(cameraPoint);
+    }
+
+    private Vec2F cameraToScreenPoint(Vec2F cameraPoint) {
+        VideoMode videoMode = CameraDevice.getInstance().getVideoMode(CameraDevice.MODE.MODE_DEFAULT);
+        VideoBackgroundConfig backgroundConfig = Renderer.getInstance().getVideoBackgroundConfig();
+
+        Point size = new Point();
+        mActivity.getWindowManager().getDefaultDisplay().getRealSize(size);
+
+        int xOffset = (size.x - backgroundConfig.getSize().getData()[0])/2 + backgroundConfig.getPosition().getData()[0];
+        int yOffset = (size.y - backgroundConfig.getSize().getData()[1])/2 - backgroundConfig.getPosition().getData()[1];
+
+        Configuration config = mActivity.getResources().getConfiguration();
+        if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            int rotatedX = videoMode.getHeight() - (int)cameraPoint.getData()[1];
+            int rotatedY = (int)cameraPoint.getData()[0];
+
+            return new Vec2F(rotatedX * backgroundConfig.getSize().getData()[0] / (float) videoMode.getHeight() + xOffset,
+                    rotatedY * backgroundConfig.getSize().getData()[1] / (float) videoMode.getWidth() + yOffset);
+        }
+
+        return new Vec2F(cameraPoint.getData()[0] * backgroundConfig.getSize().getData()[0] / (float) videoMode.getWidth() + xOffset,
+                cameraPoint.getData()[1] * backgroundConfig.getSize().getData()[1] / (float) videoMode.getHeight() + yOffset);
     }
 
 }
