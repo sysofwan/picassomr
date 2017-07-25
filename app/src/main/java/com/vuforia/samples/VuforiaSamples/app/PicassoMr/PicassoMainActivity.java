@@ -18,6 +18,7 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.hardware.SensorEventListener;
 import android.os.Build;
 import android.os.Bundle;
@@ -619,6 +620,21 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         // Process the Gestures
         if (mSampleAppMenu != null && mSampleAppMenu.processEvent(event))
             return true;
+
+        final int action = event.getAction();
+        int maskedAction = (action & MotionEvent.ACTION_MASK);
+        if (maskedAction != MotionEvent.ACTION_POINTER_DOWN)
+        {
+            float posX = event.getX();
+            float posY = event.getY();
+            Point size = new Point();
+            getWindowManager().getDefaultDisplay().getRealSize(size);
+            mTouch.setCenter(size.x/2, size.y/2, 0f, 0f);
+            mTouch.updateTouchPoint(posX, posY);
+            Log.d(LOGTAG, "My touch center:	\"" + mTouch.getPosX() + "\",\"" + mTouch.getPosY() + "\"");
+            Log.d(LOGTAG, "My touch position:	\"" + posX + "\",\"" + posY + "\"");
+            Log.d(LOGTAG, "My touch rotation:	\"" + mTouch.getRx() + "\",\"" + mTouch.getRy() + "\"");
+        }
 
         return mGestureDetector.onTouchEvent(event);
     }
