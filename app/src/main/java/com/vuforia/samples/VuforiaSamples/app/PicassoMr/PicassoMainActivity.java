@@ -18,6 +18,7 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.hardware.SensorEventListener;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -42,7 +44,6 @@ import com.vuforia.STORAGE_TYPE;
 import com.vuforia.Trackable;
 import com.vuforia.Tracker;
 import com.vuforia.TrackerManager;
-import com.vuforia.VIEW;
 import com.vuforia.Vuforia;
 import com.vuforia.samples.SampleApplication.SampleApplicationControl;
 import com.vuforia.samples.SampleApplication.SampleApplicationException;
@@ -58,12 +59,13 @@ import com.vuforia.samples.VuforiaSamples.ui.SampleAppMenu.SampleAppMenuInterfac
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
 public class PicassoMainActivity extends Activity implements SampleApplicationControl,
         SampleAppMenuInterface, SensorEventListener
 {
+
+    private boolean isCompareMode = false;
 
     private SensorManager mSensorManager;
     Sensor accelerometer;
@@ -134,6 +136,12 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        // Capture our button from layout
+        Button button = (Button)findViewById(R.id.compare_button);
+        // Register the onClick listener with the implementation above
+        button.setOnClickListener(compareButtonListener);
+
     }
 
 
@@ -315,7 +323,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         mUILayout = (RelativeLayout) inflater.inflate(R.layout.picasso_main_layout,
                 null, false);
 
-        mUILayout.setVisibility(View.INVISIBLE);
+        mUILayout.setVisibility(View.VISIBLE);
         mUILayout.setBackgroundColor(Color.BLACK);
 
         /*// Gets a reference to the loading dialog
@@ -515,48 +523,18 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     {
         if(state.getNumTrackableResults() > 0)
         {
-            if(showOverlays != true) {
-
-                final RelativeLayout layout = this.mUILayout;
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        layout.setVisibility(View.VISIBLE);
-                        layout.invalidate();
-                        showOverlays = true;
-                    }
-                });
+            if(showOverlays != true && isCompareMode == false) {
+                showOverlays(state);
             }
         }
         else
         {
             if(showOverlays != false)
             {
-                final RelativeLayout layout = this.mUILayout;
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        layout.setVisibility(View.INVISIBLE);
-                        showOverlays = false;
-                    }
-                });
+                hideOverlays();
             }
         }
-
-        if (state.getNumTrackableResults() == 0) {
-            mCanvasOverlay.updateTrackable(null);
-        }
-
-        else {
-            mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
-        }
     }
-
-
-
-
 
     @Override
     public boolean doInitTrackers()
@@ -632,6 +610,21 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         // Process the Gestures
         if (mSampleAppMenu != null && mSampleAppMenu.processEvent(event))
             return true;
+
+        final int action = event.getAction();
+        int maskedAction = (action & MotionEvent.ACTION_MASK);
+        if (maskedAction != MotionEvent.ACTION_POINTER_DOWN)
+        {
+            float posX = event.getX();
+            float posY = event.getY();
+            Point size = new Point();
+            getWindowManager().getDefaultDisplay().getRealSize(size);
+            mTouch.setCenter(size.x/2, size.y/2, 0f, 0f);
+            mTouch.updateTouchPoint(posX, posY);
+            Log.d(LOGTAG, "My touch center:	\"" + mTouch.getPosX() + "\",\"" + mTouch.getPosY() + "\"");
+            Log.d(LOGTAG, "My touch position:	\"" + posX + "\",\"" + posY + "\"");
+            Log.d(LOGTAG, "My touch rotation:	\"" + mTouch.getRx() + "\",\"" + mTouch.getRy() + "\"");
+        }
 
         return mGestureDetector.onTouchEvent(event);
     }
@@ -778,5 +771,85 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
                 imageView.setRotation(0);
             }
         }
+    }
+
+    private View.OnClickListener compareButtonListener = new View.OnClickListener()
+    {
+        public void onClick(View v) {
+
+            isCompareMode = true;
+            mRenderer.enableRenderObject();
+
+            hideOverlays();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    View comparisonText = mUILayout.findViewById(R.id.comparisonText);
+
+                    comparisonText.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+    };
+
+    @Override
+    public void onBackPressed() {
+        if(isCompareMode)
+        {
+            isCompareMode = false;
+            mRenderer.disableRenderObject();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    View comparisonText = mUILayout.findViewById(R.id.comparisonText);
+
+                    comparisonText.setVisibility(View.INVISIBLE);
+                }
+            });
+        }
+    }
+
+    private void hideOverlays()
+    {
+        mCanvasOverlay.updateTrackable(null);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                View radar = mUILayout.findViewById(R.id.radar_image_imageView);
+                View ratingAndReviews = mUILayout.findViewById(R.id.ratings_reviews);
+                View buyButton = mUILayout.findViewById(R.id.buy_button);
+                View compareButton = mUILayout.findViewById(R.id.compare_button);
+
+                radar.setVisibility(View.INVISIBLE);
+                ratingAndReviews.setVisibility(View.INVISIBLE);
+                buyButton.setVisibility(View.INVISIBLE);
+                compareButton.setVisibility(View.INVISIBLE);
+                showOverlays = false;
+            }
+        });
+    }
+
+    private void showOverlays(State state)
+    {
+        mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                View radar = mUILayout.findViewById(R.id.radar_image_imageView);
+                View ratingAndReviews = mUILayout.findViewById(R.id.ratings_reviews);
+                View buyButton = mUILayout.findViewById(R.id.buy_button);
+                View compareButton = mUILayout.findViewById(R.id.compare_button);
+
+                radar.setVisibility(View.VISIBLE);
+                ratingAndReviews.setVisibility(View.VISIBLE);
+                buyButton.setVisibility(View.VISIBLE);
+                compareButton.setVisibility(View.VISIBLE);
+                showOverlays = true;
+            }
+        });
     }
 }

@@ -11,16 +11,19 @@ public class MyTouch {
 
     private float xPos;
     private float yPos;
-    private float zPos;
+
+    private float xSize;
+    private float ySize;
 
     private float thredshold = 10f;
     private float stepIncrease = 1f;
 
-    public void setCenter(float xPos, float yPos, float zPos)
+    public void setCenter(float xPos, float yPos, float width, float height)
     {
-        this.xPos = xPos;
+        this.xPos = xPos - (2 * width); // position of the virtual obj
         this.yPos = yPos;
-        this.zPos = zPos;
+        this.xSize = width;
+        this.ySize = height;
     }
 
     public void reset()
@@ -30,20 +33,25 @@ public class MyTouch {
         this.rz = 0;
     }
 
-    public void updateTouchPoint(float xPos, float yPos, float zPos)
+    public void updateTouchPoint(float xPos, float yPos)
     {
-        if (xPos > this.xPos + thredshold)
+        if (xPos > (this.xPos + thredshold))
         {
             rx += stepIncrease;
         }
-        if (yPos > this.yPos + thredshold)
+        else if (xPos < (this.xPos - thredshold)) {
+            rx -= stepIncrease;
+        }
+
+        if (yPos > (this.yPos + thredshold))
         {
             ry += stepIncrease;
         }
-        if (zPos > this.zPos + thredshold)
+        else if (yPos < (this.yPos - thredshold))
         {
-            rz += stepIncrease;
+            ry -= stepIncrease;
         }
+
         if (rx > 360)
         {
             rx -= 360;
@@ -83,5 +91,15 @@ public class MyTouch {
     public float getRZ()
     {
         return this.rz;
+    }
+
+    public float getPosX()
+    {
+        return this.xPos;
+    }
+
+    public float getPosY()
+    {
+        return this.yPos;
     }
 }
