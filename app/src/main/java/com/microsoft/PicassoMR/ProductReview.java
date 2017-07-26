@@ -2,6 +2,7 @@ package com.microsoft.PicassoMR;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import microsoft.swagger.codegen.ratingsedgefd.models.MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1PagedReviewContract;
 
@@ -18,6 +19,8 @@ public class ProductReview
         System.out.println("\nReview Response: \n" + returnVal);
 
         ObjectMapper mapper = new ObjectMapper();
+
+        mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES,true);
         try {
             MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1PagedReviewContract reviewObj =
                     mapper.readValue(returnVal, MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1PagedReviewContract.class);

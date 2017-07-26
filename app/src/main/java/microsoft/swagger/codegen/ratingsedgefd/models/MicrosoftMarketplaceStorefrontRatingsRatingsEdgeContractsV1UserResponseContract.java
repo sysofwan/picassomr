@@ -19,7 +19,7 @@ public class MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1UserResp
     /**
      * The id property.
      */
-    @JsonProperty(value = "id")
+    @JsonProperty(value = "Id")
     private UUID id;
 
     /**

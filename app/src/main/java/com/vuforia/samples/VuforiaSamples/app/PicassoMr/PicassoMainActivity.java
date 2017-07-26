@@ -176,6 +176,8 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         // Register the onClick listener with the implementation above
         button.setOnClickListener(compareButtonListener);
 
+        this.LoadData();
+
         findViews();
 
         setupProgressDialog();
@@ -194,6 +196,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
             }
         });
 
+
     }
 
     private void setupProgressDialog() {
@@ -209,7 +212,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         buyButton = mUILayout.findViewById(R.id.buy_button);
         compareButton = mUILayout.findViewById(R.id.compare_button);
         customizationSpinner = mUILayout.findViewById(R.id.customize_spinner);
-        this.LoadData();
+
     }
 
 
