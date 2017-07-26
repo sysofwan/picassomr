@@ -71,8 +71,12 @@ public class CanvasOverlayView extends SurfaceView implements Choreographer.Fram
 
     private void draw(Canvas canvas, float cX, float cY) {
         tooltipsDrawer.draw(canvas,
-                new PointF(cX, cY), new PointF(cX + 200, cY + 200), "Hello world!", "lorem ipsum some description");
+                new PointF(cX - 30, cY - 100), new PointF(cX + 200, cY - 200), "Monitor", "lorem ipsum some description");
+
+        tooltipsDrawer.draw(canvas,
+                new PointF(cX - 30, cY + 250), new PointF(cX + 200, cY + 350), "Keyboard", "lorem ipsum some description");
     }
+
 
 
     private Vec2F getScreenCoor(TrackableResult result) {
@@ -87,11 +91,8 @@ public class CanvasOverlayView extends SurfaceView implements Choreographer.Fram
         VideoMode videoMode = CameraDevice.getInstance().getVideoMode(CameraDevice.MODE.MODE_DEFAULT);
         VideoBackgroundConfig backgroundConfig = Renderer.getInstance().getVideoBackgroundConfig();
 
-        Point size = new Point();
-        mActivity.getWindowManager().getDefaultDisplay().getRealSize(size);
-
-        int xOffset = (size.x - backgroundConfig.getSize().getData()[0])/2 + backgroundConfig.getPosition().getData()[0];
-        int yOffset = (size.y - backgroundConfig.getSize().getData()[1])/2 - backgroundConfig.getPosition().getData()[1];
+        int xOffset = (getWidth() - backgroundConfig.getSize().getData()[0])/2 + backgroundConfig.getPosition().getData()[0];
+        int yOffset = (getHeight() - backgroundConfig.getSize().getData()[1])/2 - backgroundConfig.getPosition().getData()[1];
 
         Configuration config = mActivity.getResources().getConfiguration();
         if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
