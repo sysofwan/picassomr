@@ -37,8 +37,11 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.microsoft.PicassoMR.ProductRating;
+import com.microsoft.PicassoMR.ProductReview;
 import com.vuforia.CameraDevice;
 import com.vuforia.DataSet;
 import com.vuforia.ObjectTracker;
@@ -64,9 +67,15 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 
+import microsoft.swagger.codegen.ratingsedgefd.models.MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1PagedReviewContract;
+import microsoft.swagger.codegen.ratingsedgefd.models.MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1RatingsSummaryContract;
+
 public class PicassoMainActivity extends Activity implements SampleApplicationControl,
         SampleAppMenuInterface, SensorEventListener
 {
+    // FOR DEBUGGING ONLY
+    // use debug image: http://www.vergium.com/wp-content/uploads/2017/04/vuforia_stones_vergium.jpg
+    private boolean debugMode = false;
 
     private boolean isCompareMode = false;
 
@@ -79,6 +88,8 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     SampleApplicationSession vuforiaAppSession;
 
     private DataSet mCurrentDataset;
+    private ArrayList<String> mDatasetStrings = new ArrayList<String>();
+    private int mCurrentDatasetSelectionIndex = 0;
 
     // Our OpenGL view:
     private SampleApplicationGLView mGlView;
@@ -116,6 +127,9 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     private View buyButton;
     private View compareButton;
 
+    MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1RatingsSummaryContract ratingData;
+
+    MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1PagedReviewContract reviewData;
 
     // Called when the activity first starts or the user navigates back to an
     // activity.
@@ -128,6 +142,12 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         vuforiaAppSession = new SampleApplicationSession(this);
 
         startLoadingAnimation();
+
+        // FOR DEBUGGING ONLY
+        if (debugMode) {
+            mDatasetStrings.add("StonesAndChips.xml");
+            mDatasetStrings.add("Tarmac.xml");
+        }
 
         vuforiaAppSession
                 .initAR(this, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -150,7 +170,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         Button button = (Button)findViewById(R.id.compare_button);
         // Register the onClick listener with the implementation above
         button.setOnClickListener(compareButtonListener);
-
+        
         findViews();
 
     }
@@ -161,6 +181,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         buyButton = mUILayout.findViewById(R.id.buy_button);
         compareButton = mUILayout.findViewById(R.id.compare_button);
         customizationSpinner = mUILayout.findViewById(R.id.customize_spinner);
+        this.LoadData();
     }
 
 
@@ -376,9 +397,18 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         if (mCurrentDataset == null)
             return false;
 
+        // FOR DEBUGGING ONLY
+        if (debugMode) {
+            if (!mCurrentDataset.load(
+                    mDatasetStrings.get(mCurrentDatasetSelectionIndex),
+                    STORAGE_TYPE.STORAGE_APPRESOURCE))
+                return false;
+        }
+        else {
         if (!mCurrentDataset.load("PicassoDB_OT.xml",
                 STORAGE_TYPE.STORAGE_APPRESOURCE))
             return false;
+        }
 
         if (!objectTracker.activateDataSet(mCurrentDataset))
             return false;
@@ -642,9 +672,9 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
                 getWindowManager().getDefaultDisplay().getRealSize(size);
                 mTouch.setCenter(size.x / 2, size.y / 2, 0f, 0f);
                 mTouch.updateTouchPoint(posX, posY);
-                Log.d(LOGTAG, "My touch center:	\"" + mTouch.getPosX() + "\",\"" + mTouch.getPosY() + "\"");
-                Log.d(LOGTAG, "My touch position:	\"" + posX + "\",\"" + posY + "\"");
-                Log.d(LOGTAG, "My touch rotation:	\"" + mTouch.getRx() + "\",\"" + mTouch.getRy() + "\"");
+                //Log.d(LOGTAG, "My touch center:	\"" + mTouch.getPosX() + "\",\"" + mTouch.getPosY() + "\"");
+                //Log.d(LOGTAG, "My touch position:	\"" + posX + "\",\"" + posY + "\"");
+                //Log.d(LOGTAG, "My touch rotation:	\"" + mTouch.getRx() + "\",\"" + mTouch.getRy() + "\"");
             }
         }
 
@@ -863,4 +893,61 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
             }
         });
     }
+
+    private void LoadData()
+    {
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try  {
+                    ratingData = ProductRating.RequestProductRating();
+                    reviewData = ProductReview.RequestProductReview();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            PopulateData();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+
+    }
+
+    private void PopulateData()
+    {
+        if(reviewData != null)
+        {
+            TextView averageRatingValue = (TextView)mUILayout.findViewById(R.id.averageRatingValue);
+            TextView favorableRatingValue = (TextView)mUILayout.findViewById(R.id.favorableRatingValue);
+            TextView favorableRatingTitle = (TextView)mUILayout.findViewById(R.id.favorableRatingTitle);
+            TextView favorableRatingText = (TextView)mUILayout.findViewById(R.id.favorableRatingText);
+
+            TextView criticalRatingValue = (TextView)mUILayout.findViewById(R.id.criticalRatingValue);
+            TextView criticalRatingTitle = (TextView)mUILayout.findViewById(R.id.criticalRatingTitle);
+            TextView criticalRatingText = (TextView)mUILayout.findViewById(R.id.criticalRatingText);
+
+            averageRatingValue.setText(ratingData.averageRating() + "/5");
+
+
+            if(reviewData.items().size() > 0) {
+                favorableRatingValue.setText(reviewData.items().get(0).rating() + "/5");
+                favorableRatingTitle.setText(reviewData.items().get(0).title());
+                favorableRatingText.setText(reviewData.items().get(0).reviewText());
+            }
+
+            if(reviewData.items().size() > 1) {
+                criticalRatingValue.setText(reviewData.items().get(1).rating() + "/5");
+                criticalRatingTitle.setText(reviewData.items().get(1).title());
+                criticalRatingText.setText(reviewData.items().get(1).reviewText());
+            }
+        }
+    }
+
 }

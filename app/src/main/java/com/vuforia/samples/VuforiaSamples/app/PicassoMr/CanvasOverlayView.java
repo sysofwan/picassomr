@@ -63,7 +63,7 @@ public class CanvasOverlayView extends SurfaceView implements Choreographer.Fram
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         TrackableResult result = trackableResult;
         if (result != null) {
-            Log.d(TAG, "drawing canvas");
+            //Log.d(TAG, "drawing canvas");
             Vec2F coor = getScreenCoor(result);
             draw(canvas, coor.getData()[0], coor.getData()[1]);
         }
