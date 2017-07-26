@@ -35,9 +35,11 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.microsoft.PicassoMR.ProductRating;
+import com.microsoft.PicassoMR.ProductReview;
 import com.vuforia.CameraDevice;
 import com.vuforia.DataSet;
 import com.vuforia.ObjectTracker;
@@ -63,6 +65,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 
+import microsoft.swagger.codegen.ratingsedgefd.models.MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1PagedReviewContract;
 import microsoft.swagger.codegen.ratingsedgefd.models.MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1RatingsSummaryContract;
 
 public class PicassoMainActivity extends Activity implements SampleApplicationControl,
@@ -111,7 +114,9 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
     MyTouch mTouch;
 
-    MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1RatingsSummaryContract reviewData;
+    MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1RatingsSummaryContract ratingData;
+
+    MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1PagedReviewContract reviewData;
 
     // Called when the activity first starts or the user navigates back to an
     // activity.
@@ -868,7 +873,15 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
             @Override
             public void run() {
                 try  {
-                    reviewData = ProductRating.RequestProductRating();
+                    ratingData = ProductRating.RequestProductRating();
+                    reviewData = ProductReview.RequestProductReview();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            PopulateData();
+                        }
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -881,7 +894,32 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
     private void PopulateData()
     {
+        if(reviewData != null)
+        {
+            TextView averageRatingValue = (TextView)mUILayout.findViewById(R.id.averageRatingValue);
+            TextView favorableRatingValue = (TextView)mUILayout.findViewById(R.id.favorableRatingValue);
+            TextView favorableRatingTitle = (TextView)mUILayout.findViewById(R.id.favorableRatingTitle);
+            TextView favorableRatingText = (TextView)mUILayout.findViewById(R.id.favorableRatingText);
 
+            TextView criticalRatingValue = (TextView)mUILayout.findViewById(R.id.criticalRatingValue);
+            TextView criticalRatingTitle = (TextView)mUILayout.findViewById(R.id.criticalRatingTitle);
+            TextView criticalRatingText = (TextView)mUILayout.findViewById(R.id.criticalRatingText);
+
+            averageRatingValue.setText(ratingData.averageRating() + "/5");
+
+
+            if(reviewData.items().size() > 0) {
+                favorableRatingValue.setText(reviewData.items().get(0).rating() + "/5");
+                favorableRatingTitle.setText(reviewData.items().get(0).title());
+                favorableRatingText.setText(reviewData.items().get(0).reviewText());
+            }
+
+            if(reviewData.items().size() > 1) {
+                criticalRatingValue.setText(reviewData.items().get(1).rating() + "/5");
+                criticalRatingTitle.setText(reviewData.items().get(1).title());
+                criticalRatingText.setText(reviewData.items().get(1).reviewText());
+            }
+        }
     }
 
 }
