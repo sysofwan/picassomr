@@ -64,10 +64,15 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
     private int shaderProgramID;
     private int vertexHandle;
     private int textureCoordHandle;
+    private int normalsHandle;
+
     private int texSampler2DHandle;
     private int mvpMatrixHandle;
+    private int inverseMvMatrixHandle;
     private int opacityHandle;
     private int colorHandle;
+    private int shineDamperHandle;
+    private int reflectivityHandle;
 
     private int transformationMatrixHandle;
     private int lightPositionVectorHandle;
@@ -178,10 +183,15 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
                 "vertexPosition");
         textureCoordHandle = GLES20.glGetAttribLocation(shaderProgramID,
                 "vertexTexCoord");
+        normalsHandle = GLES20.glGetAttribLocation(shaderProgramID,
+                "vertexNormals");
+
         texSampler2DHandle = GLES20.glGetUniformLocation(shaderProgramID,
                 "texSampler2D");
         mvpMatrixHandle = GLES20.glGetUniformLocation(shaderProgramID,
                 "modelViewProjectionMatrix");
+        inverseMvMatrixHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "inverseModelViewMatrix");
         opacityHandle = GLES20.glGetUniformLocation(shaderProgramID,
                 "opacity");
         colorHandle = GLES20.glGetUniformLocation(shaderProgramID, "color");
@@ -194,6 +204,10 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
                 "lightPosition");
         lightColorVectorHandle = GLES20.glGetUniformLocation(shaderProgramID,
                 "lightColor");
+        shineDamperHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "shineDamper");
+        reflectivityHandle = GLES20.glGetUniformLocation(shaderProgramID,
+                "reflectivity");
 
         // Hide the Loading Dialog
         /*// Hide the Loading Dialog
@@ -226,8 +240,10 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
-        float[] lightPosition = new Vec3F(0, 0, -20).getData();
-        float[] lightColor = new Vec3F(1,1,1).getData();
+        float[] lightPosition = new Vec3F(500, 1000, 1000).getData();
+        float[] lightColor = new Vec3F(0.01f,0.01f,0.01f).getData();
+        float shineDamper = 1f;
+        float reflectivity = 1f;
 
         if (state.getNumTrackableResults() == 0)
         {
@@ -260,16 +276,17 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
 
             //mActivity.mTouch.setCenter(centerPoint[0], centerPoint[1], objectSize[0], objectSize[1]);
 
-            float[] transformationData = MyMath.createTransformationMatrix(new Vec3F(0f, 0f, 0f), 0f, 0f, 0f, 1);
+            //float[] transformationData = MyMath.createTransformationMatrix(new Vec3F(0f, 0f, 0f), 0f, 0f, 0f, 1);
 
-            float[] invTransformationData = MyMath.invert(transformationData);
+            float[] inverseModelViewMatrix = MyMath.invert(modelViewMatrix);
+            float[] transformationMatrix = MyMath.getIdentity();
 
-            float[] modelViewTransformation = new float[16];
-            //Matrix.multiplyMM(modelViewTransformation, 0, modelViewMatrix, 0, transformationData, 0);
+            transformationMatrix = MyMath.fixingLaptopPosition(transformationMatrix);
+            transformationMatrix = MyMath.moveHorizontalPosition(transformationMatrix, objectSize[0]*2*-1);
+            transformationMatrix = MyMath.rotateObject(transformationMatrix, mActivity.mTouch.getRx(), mActivity.mTouch.getRy());
 
             modelViewMatrix = MyMath.fixingLaptopPosition(modelViewMatrix);
             modelViewMatrix = MyMath.moveHorizontalPosition(modelViewMatrix, objectSize[0]*2*-1);
-
             modelViewMatrix = MyMath.rotateObject(modelViewMatrix, mActivity.mTouch.getRx(), mActivity.mTouch.getRy());
 
             Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelViewMatrix, 0);
@@ -284,8 +301,12 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
             GLES20.glVertexAttribPointer(textureCoordHandle, 2,
                     GLES20.GL_FLOAT, false, 0, mCubeObject.getTexCoords());
 
+            GLES20.glVertexAttribPointer(normalsHandle, 3, GLES20.GL_FLOAT,
+                    false, 0, mCubeObject.getNormals());
+
             GLES20.glEnableVertexAttribArray(vertexHandle);
             GLES20.glEnableVertexAttribArray(textureCoordHandle);
+            GLES20.glEnableVertexAttribArray(normalsHandle);
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
@@ -296,12 +317,16 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
 
             GLES20.glUniform3fv(lightPositionVectorHandle, 1, lightPosition, 0);
             GLES20.glUniform3fv(lightColorVectorHandle, 1, lightColor, 0);
+            GLES20.glUniform1f(shineDamperHandle, shineDamper);
+            GLES20.glUniform1f(reflectivityHandle, reflectivity);
 
             // pass the model view matrix to the shader
             GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
                     modelViewProjection, 0);
+            GLES20.glUniformMatrix4fv(inverseMvMatrixHandle, 1, false,
+                    inverseModelViewMatrix, 0);
             GLES20.glUniformMatrix4fv(transformationMatrixHandle, 1, false,
-                    transformationData, 0);
+                    transformationMatrix, 0);
 
             if(renderObject == true)
             {
@@ -368,5 +393,7 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
         return new Vec2F(cameraPoint.getData()[0] * backgroundConfig.getSize().getData()[0] / (float) videoMode.getWidth() + xOffset,
                 cameraPoint.getData()[1] * backgroundConfig.getSize().getData()[1] / (float) videoMode.getHeight() + yOffset);
     }
+
+
 
 }

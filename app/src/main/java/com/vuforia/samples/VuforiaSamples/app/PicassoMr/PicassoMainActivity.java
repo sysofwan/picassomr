@@ -10,11 +10,12 @@ countries.
 
 package com.vuforia.samples.VuforiaSamples.app.PicassoMr;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -30,10 +31,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,6 +75,9 @@ import microsoft.swagger.codegen.ratingsedgefd.models.MicrosoftMarketplaceStoref
 public class PicassoMainActivity extends Activity implements SampleApplicationControl,
         SampleAppMenuInterface, SensorEventListener
 {
+    // FOR DEBUGGING ONLY
+    // use debug image: http://www.vergium.com/wp-content/uploads/2017/04/vuforia_stones_vergium.jpg
+    private boolean debugMode = false;
 
     private boolean isCompareMode = false;
 
@@ -83,6 +90,8 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     SampleApplicationSession vuforiaAppSession;
 
     private DataSet mCurrentDataset;
+    private ArrayList<String> mDatasetStrings = new ArrayList<String>();
+    private int mCurrentDatasetSelectionIndex = 0;
 
     // Our OpenGL view:
     private SampleApplicationGLView mGlView;
@@ -114,6 +123,15 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
     MyTouch mTouch;
 
+    private View customizationSpinner;
+    private View radar;
+    private View ratingAndReviews;
+    private View buyButton;
+    private View compareButton;
+
+    private ProgressDialog progressDialog;
+    private Handler buyHandler;
+
     MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1RatingsSummaryContract ratingData;
 
     MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1PagedReviewContract reviewData;
@@ -129,6 +147,12 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         vuforiaAppSession = new SampleApplicationSession(this);
 
         startLoadingAnimation();
+
+        // FOR DEBUGGING ONLY
+        if (debugMode) {
+            mDatasetStrings.add("StonesAndChips.xml");
+            mDatasetStrings.add("Tarmac.xml");
+        }
 
         vuforiaAppSession
                 .initAR(this, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -152,6 +176,39 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         // Register the onClick listener with the implementation above
         button.setOnClickListener(compareButtonListener);
 
+        findViews();
+
+        setupProgressDialog();
+
+        buyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                progressDialog.show();
+                buyHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressDialog.hide();
+                        showToast("Thank you for your payment!");
+                    }
+                }, 3000);
+            }
+        });
+
+    }
+
+    private void setupProgressDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.isIndeterminate();
+        progressDialog.setMessage("Processing your payment...");
+        buyHandler = new Handler();
+    }
+
+    private void findViews() {
+        radar = mUILayout.findViewById(R.id.radar_image_imageView);
+        ratingAndReviews = mUILayout.findViewById(R.id.ratings_reviews);
+        buyButton = mUILayout.findViewById(R.id.buy_button);
+        compareButton = mUILayout.findViewById(R.id.compare_button);
+        customizationSpinner = mUILayout.findViewById(R.id.customize_spinner);
         this.LoadData();
     }
 
@@ -368,9 +425,18 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         if (mCurrentDataset == null)
             return false;
 
+        // FOR DEBUGGING ONLY
+        if (debugMode) {
+            if (!mCurrentDataset.load(
+                    mDatasetStrings.get(mCurrentDatasetSelectionIndex),
+                    STORAGE_TYPE.STORAGE_APPRESOURCE))
+                return false;
+        }
+        else {
         if (!mCurrentDataset.load("PicassoDB_OT.xml",
                 STORAGE_TYPE.STORAGE_APPRESOURCE))
             return false;
+        }
 
         if (!objectTracker.activateDataSet(mCurrentDataset))
             return false;
@@ -536,7 +602,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         {
             mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
             if(showOverlays != true) {
-                showOverlays(state);
+                showOverlays();
             }
         }
         else
@@ -634,9 +700,9 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
                 getWindowManager().getDefaultDisplay().getRealSize(size);
                 mTouch.setCenter(size.x / 2, size.y / 2, 0f, 0f);
                 mTouch.updateTouchPoint(posX, posY);
-                Log.d(LOGTAG, "My touch center:	\"" + mTouch.getPosX() + "\",\"" + mTouch.getPosY() + "\"");
-                Log.d(LOGTAG, "My touch position:	\"" + posX + "\",\"" + posY + "\"");
-                Log.d(LOGTAG, "My touch rotation:	\"" + mTouch.getRx() + "\",\"" + mTouch.getRy() + "\"");
+                //Log.d(LOGTAG, "My touch center:	\"" + mTouch.getPosX() + "\",\"" + mTouch.getPosY() + "\"");
+                //Log.d(LOGTAG, "My touch position:	\"" + posX + "\",\"" + posY + "\"");
+                //Log.d(LOGTAG, "My touch rotation:	\"" + mTouch.getRx() + "\",\"" + mTouch.getRy() + "\"");
             }
         }
 
@@ -831,36 +897,26 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                View radar = mUILayout.findViewById(R.id.radar_image_imageView);
-                View ratingAndReviews = mUILayout.findViewById(R.id.ratings_reviews);
-                View buyButton = mUILayout.findViewById(R.id.buy_button);
-                View compareButton = mUILayout.findViewById(R.id.compare_button);
-
                 radar.setVisibility(View.INVISIBLE);
                 ratingAndReviews.setVisibility(View.INVISIBLE);
                 buyButton.setVisibility(View.INVISIBLE);
                 compareButton.setVisibility(View.INVISIBLE);
+                customizationSpinner.setVisibility(View.INVISIBLE);
                 showOverlays = false;
             }
         });
     }
 
-    private void showOverlays(State state)
+    private void showOverlays()
     {
-
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                View radar = mUILayout.findViewById(R.id.radar_image_imageView);
-                View ratingAndReviews = mUILayout.findViewById(R.id.ratings_reviews);
-                View buyButton = mUILayout.findViewById(R.id.buy_button);
-                View compareButton = mUILayout.findViewById(R.id.compare_button);
-
                 radar.setVisibility(View.VISIBLE);
                 ratingAndReviews.setVisibility(View.VISIBLE);
                 buyButton.setVisibility(View.VISIBLE);
                 compareButton.setVisibility(View.VISIBLE);
+                customizationSpinner.setVisibility(View.VISIBLE);
                 showOverlays = true;
             }
         });

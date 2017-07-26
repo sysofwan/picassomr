@@ -6,6 +6,8 @@ package com.vuforia.samples.SampleApplication.utils;
 
 import android.opengl.Matrix;
 
+import java.nio.Buffer;
+
 import com.vuforia.Vec3F;
 import com.vuforia.Vec4F;
 import com.vuforia.Matrix34F;
@@ -21,6 +23,13 @@ public class MyMath {
         Matrix.rotateM(matrixData, 0, ry, 0, 1, 0);
         Matrix.rotateM(matrixData, 0, rz, 0, 0, 1);
         Matrix.scaleM(matrixData, 0, scale, scale, scale);
+        return matrixData;
+    }
+
+    public static float[] getIdentity()
+    {
+        float[] matrixData = new float[4*4];
+        Matrix.setIdentityM(matrixData,0);
         return matrixData;
     }
 
@@ -46,10 +55,10 @@ public class MyMath {
         return modelMatrix;
     }
 
-    public static float[] invert(float[] viewMatrix)
+    public static float[] invert(float[] modelMatrix)
     {
-        float[] invViewMatrix = new float[4*4];
-        Matrix.invertM(viewMatrix, 0, invViewMatrix, 0);
-        return invViewMatrix;
+        float[] invModelMatrix = new float[4*4];
+        Matrix.invertM(invModelMatrix, 0, modelMatrix, 0);
+        return invModelMatrix;
     }
 }
