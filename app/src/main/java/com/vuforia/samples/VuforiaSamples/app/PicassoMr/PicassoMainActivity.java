@@ -10,6 +10,7 @@ countries.
 
 package com.vuforia.samples.VuforiaSamples.app.PicassoMr;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import android.app.Activity;
@@ -64,6 +65,9 @@ import android.hardware.SensorManager;
 public class PicassoMainActivity extends Activity implements SampleApplicationControl,
         SampleAppMenuInterface, SensorEventListener
 {
+    // FOR DEBUGGING ONLY
+    // use debug image: http://www.vergium.com/wp-content/uploads/2017/04/vuforia_stones_vergium.jpg
+    private boolean debugMode = true;
 
     private boolean isCompareMode = false;
 
@@ -76,6 +80,8 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     SampleApplicationSession vuforiaAppSession;
 
     private DataSet mCurrentDataset;
+    private ArrayList<String> mDatasetStrings = new ArrayList<String>();
+    private int mCurrentDatasetSelectionIndex = 0;
 
     // Our OpenGL view:
     private SampleApplicationGLView mGlView;
@@ -119,6 +125,12 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         vuforiaAppSession = new SampleApplicationSession(this);
 
         startLoadingAnimation();
+
+        // FOR DEBUGGING ONLY
+        if (debugMode) {
+            mDatasetStrings.add("StonesAndChips.xml");
+            mDatasetStrings.add("Tarmac.xml");
+        }
 
         vuforiaAppSession
                 .initAR(this, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -357,9 +369,18 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         if (mCurrentDataset == null)
             return false;
 
+        // FOR DEBUGGING ONLY
+        if (debugMode) {
+            if (!mCurrentDataset.load(
+                    mDatasetStrings.get(mCurrentDatasetSelectionIndex),
+                    STORAGE_TYPE.STORAGE_APPRESOURCE))
+                return false;
+        }
+        else {
         if (!mCurrentDataset.load("PicassoDB_OT.xml",
                 STORAGE_TYPE.STORAGE_APPRESOURCE))
             return false;
+        }
 
         if (!objectTracker.activateDataSet(mCurrentDataset))
             return false;
@@ -623,9 +644,9 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
                 getWindowManager().getDefaultDisplay().getRealSize(size);
                 mTouch.setCenter(size.x / 2, size.y / 2, 0f, 0f);
                 mTouch.updateTouchPoint(posX, posY);
-                Log.d(LOGTAG, "My touch center:	\"" + mTouch.getPosX() + "\",\"" + mTouch.getPosY() + "\"");
-                Log.d(LOGTAG, "My touch position:	\"" + posX + "\",\"" + posY + "\"");
-                Log.d(LOGTAG, "My touch rotation:	\"" + mTouch.getRx() + "\",\"" + mTouch.getRy() + "\"");
+                //Log.d(LOGTAG, "My touch center:	\"" + mTouch.getPosX() + "\",\"" + mTouch.getPosY() + "\"");
+                //Log.d(LOGTAG, "My touch position:	\"" + posX + "\",\"" + posY + "\"");
+                //Log.d(LOGTAG, "My touch rotation:	\"" + mTouch.getRx() + "\",\"" + mTouch.getRy() + "\"");
             }
         }
 
