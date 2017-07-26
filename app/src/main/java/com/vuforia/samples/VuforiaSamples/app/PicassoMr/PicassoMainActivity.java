@@ -15,6 +15,7 @@ import java.util.Vector;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -34,6 +35,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -127,6 +129,9 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     private View buyButton;
     private View compareButton;
 
+    private ProgressDialog progressDialog;
+    private Handler buyHandler;
+
     MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1RatingsSummaryContract ratingData;
 
     MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1PagedReviewContract reviewData;
@@ -173,6 +178,29 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
         findViews();
 
+        setupProgressDialog();
+
+        buyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                progressDialog.show();
+                buyHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressDialog.hide();
+                        showToast("Thank you for your payment!");
+                    }
+                }, 3000);
+            }
+        });
+
+    }
+
+    private void setupProgressDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.isIndeterminate();
+        progressDialog.setMessage("Processing your payment...");
+        buyHandler = new Handler();
     }
 
     private void findViews() {
