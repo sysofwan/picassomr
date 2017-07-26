@@ -68,4 +68,10 @@
 
     <string name="splash_screen_description">Vuforia Splash</string>
 
+    <string-array name="customize_options">
+        <item>128GB SSD, 4GB RAM</item>
+        <item>512GB SSD, 8GB RAM</item>
+        <item>512GB SSD, 16GB RAM</item>
+    </string-array>
+
 </resources>

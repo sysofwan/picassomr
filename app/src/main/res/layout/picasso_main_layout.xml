@@ -25,6 +25,13 @@
         android:layout_alignParentTop="true"
         android:visibility="invisible">
     </Button>
+    <Spinner
+        android:id="@+id/customize_spinner"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_toRightOf="@id/buy_button"
+        android:entries="@array/customize_options">
+    </Spinner>
     <Button
         android:id="@+id/compare_button"
         android:text="Compare"

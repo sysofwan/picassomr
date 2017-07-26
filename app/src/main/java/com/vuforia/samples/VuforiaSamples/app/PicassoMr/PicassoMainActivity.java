@@ -10,6 +10,7 @@ countries.
 
 package com.vuforia.samples.VuforiaSamples.app.PicassoMr;
 
+import java.util.ArrayList;
 import java.util.Vector;
 
 import android.app.Activity;
@@ -29,10 +30,12 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -107,6 +110,12 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
     MyTouch mTouch;
 
+    private View customizationSpinner;
+    private View radar;
+    private View ratingAndReviews;
+    private View buyButton;
+    private View compareButton;
+
 
     // Called when the activity first starts or the user navigates back to an
     // activity.
@@ -142,6 +151,16 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         // Register the onClick listener with the implementation above
         button.setOnClickListener(compareButtonListener);
 
+        findViews();
+
+    }
+
+    private void findViews() {
+        radar = mUILayout.findViewById(R.id.radar_image_imageView);
+        ratingAndReviews = mUILayout.findViewById(R.id.ratings_reviews);
+        buyButton = mUILayout.findViewById(R.id.buy_button);
+        compareButton = mUILayout.findViewById(R.id.compare_button);
+        customizationSpinner = mUILayout.findViewById(R.id.customize_spinner);
     }
 
 
@@ -525,7 +544,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         {
             mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
             if(showOverlays != true) {
-                showOverlays(state);
+                showOverlays();
             }
         }
         else
@@ -820,36 +839,26 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                View radar = mUILayout.findViewById(R.id.radar_image_imageView);
-                View ratingAndReviews = mUILayout.findViewById(R.id.ratings_reviews);
-                View buyButton = mUILayout.findViewById(R.id.buy_button);
-                View compareButton = mUILayout.findViewById(R.id.compare_button);
-
                 radar.setVisibility(View.INVISIBLE);
                 ratingAndReviews.setVisibility(View.INVISIBLE);
                 buyButton.setVisibility(View.INVISIBLE);
                 compareButton.setVisibility(View.INVISIBLE);
+                customizationSpinner.setVisibility(View.INVISIBLE);
                 showOverlays = false;
             }
         });
     }
 
-    private void showOverlays(State state)
+    private void showOverlays()
     {
-
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                View radar = mUILayout.findViewById(R.id.radar_image_imageView);
-                View ratingAndReviews = mUILayout.findViewById(R.id.ratings_reviews);
-                View buyButton = mUILayout.findViewById(R.id.buy_button);
-                View compareButton = mUILayout.findViewById(R.id.compare_button);
-
                 radar.setVisibility(View.VISIBLE);
                 ratingAndReviews.setVisibility(View.VISIBLE);
                 buyButton.setVisibility(View.VISIBLE);
                 compareButton.setVisibility(View.VISIBLE);
+                customizationSpinner.setVisibility(View.VISIBLE);
                 showOverlays = true;
             }
         });

@@ -369,4 +369,6 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
                 cameraPoint.getData()[1] * backgroundConfig.getSize().getData()[1] / (float) videoMode.getHeight() + yOffset);
     }
 
+
+
 }
