@@ -18,11 +18,11 @@ public class TooltipsDrawer {
 
     private Paint descriptionFontPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private Rect textRect = new Rect();
+    private Paint.FontMetrics fontMetrics = new Paint.FontMetrics();
 
     public TooltipsDrawer() {
         arrowPaint.setColor(Color.GREEN);
-        arrowPaint.setStrokeWidth(13f);
+        arrowPaint.setStrokeWidth(10f);
 
         titleFontPaint.setColor(Color.GREEN);
         titleFontPaint.setTextSize(70f);
@@ -35,15 +35,14 @@ public class TooltipsDrawer {
     public void draw(Canvas canvas, PointF start, PointF end, String title, String description) {
         canvas.drawLine(start.x, start.y, end.x, end.y, arrowPaint);
 
-        float textX = end.x - 25;
-        float textY = end.y + 75;
+        float textX = end.x + 20;
+        float textY = end.y + 15;
         canvas.drawText(title, textX, textY, titleFontPaint);
         if (description != null) {
-            titleFontPaint.getTextBounds(title, 0, title.length(), textRect);
+            titleFontPaint.getFontMetrics(fontMetrics);
 
-            float titleBottom = textY + textRect.bottom;
-            titleFontPaint.getTextBounds(description, 0, title.length(), textRect);
-            canvas.drawText(description, textX, titleBottom + textRect.bottom + 30, descriptionFontPaint);
+            float titleBottom = textY + fontMetrics.descent;
+            canvas.drawText(description, textX, titleBottom + fontMetrics.bottom + 20, descriptionFontPaint);
         }
     }
 
