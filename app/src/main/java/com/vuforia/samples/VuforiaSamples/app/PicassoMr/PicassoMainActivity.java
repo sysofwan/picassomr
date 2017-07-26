@@ -170,7 +170,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         Button button = (Button)findViewById(R.id.compare_button);
         // Register the onClick listener with the implementation above
         button.setOnClickListener(compareButtonListener);
-        
+
         findViews();
 
     }

@@ -30,7 +30,9 @@
         android:layout_width="100dp"
         android:layout_height="50dp"
         android:layout_toRightOf="@id/buy_button"
-        android:entries="@array/customize_options">
+        android:visibility="invisible"
+        android:entries="@array/customize_options"
+        android:background="#d6737373">
     </Spinner>
     <Button
         android:id="@+id/compare_button"
