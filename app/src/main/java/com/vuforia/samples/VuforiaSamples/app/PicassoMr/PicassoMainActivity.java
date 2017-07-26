@@ -192,7 +192,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
                         progressDialog.hide();
                         showToast("Thank you for your payment!");
                     }
-                }, 3000);
+                }, 2000);
             }
         });
 
