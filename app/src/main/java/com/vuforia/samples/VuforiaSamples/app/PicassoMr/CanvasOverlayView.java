@@ -71,10 +71,10 @@ public class CanvasOverlayView extends SurfaceView implements Choreographer.Fram
 
     private void draw(Canvas canvas, float cX, float cY) {
         tooltipsDrawer.draw(canvas,
-                new PointF(cX - 30, cY - 100), new PointF(cX + 200, cY - 200), "Monitor", "lorem ipsum some description");
+                new PointF(cX - 30, cY - 100), new PointF(cX + 200, cY - 200), "12.3-inch Pixel Sense display", "10 point multi-touch");
 
         tooltipsDrawer.draw(canvas,
-                new PointF(cX - 30, cY + 250), new PointF(cX + 200, cY + 350), "Keyboard", "lorem ipsum some description");
+                new PointF(cX - 35, cY + 300), new PointF(cX + 200, cY + 400), "Type Cover", "Alcantara fabric");
     }
 
 

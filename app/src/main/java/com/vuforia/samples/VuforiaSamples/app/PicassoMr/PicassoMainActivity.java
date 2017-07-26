@@ -521,14 +521,16 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     @Override
     public void onVuforiaUpdate(State state)
     {
-        if(state.getNumTrackableResults() > 0)
+        if(state.getNumTrackableResults() > 0 && !isCompareMode)
         {
-            if(showOverlays != true && isCompareMode == false) {
+            mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
+            if(showOverlays != true) {
                 showOverlays(state);
             }
         }
         else
         {
+            mCanvasOverlay.updateTrackable(null);
             if(showOverlays != false)
             {
                 hideOverlays();
@@ -813,7 +815,6 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
     private void hideOverlays()
     {
-        mCanvasOverlay.updateTrackable(null);
 
         runOnUiThread(new Runnable() {
             @Override
@@ -834,7 +835,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
     private void showOverlays(State state)
     {
-        mCanvasOverlay.updateTrackable(state.getTrackableResult(0));
+
 
         runOnUiThread(new Runnable() {
             @Override
