@@ -5,6 +5,15 @@ def NATIVE_LIB_DIR = 'build/lib'
 def JAR_DIR = 'build/java/vuforia'
 
 android {
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
+
     compileSdkVersion 22
     buildToolsVersion '25.0.0'
 
@@ -44,4 +53,9 @@ dependencies {
     compile files("$VUFORIA_SDK_DIR/$JAR_DIR/Vuforia.jar")
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.android.support.constraint:constraint-layout:+'
+    compile (
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.7.1'],
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.7.1'],
+            [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.7.1']
+    )
 }

@@ -10,6 +10,7 @@ countries.
 
 package com.vuforia.samples.VuforiaSamples.app.PicassoMr;
 
+import java.io.IOException;
 import java.util.Vector;
 
 import android.app.Activity;
@@ -36,6 +37,7 @@ import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.microsoft.PicassoMR.ProductRating;
 import com.vuforia.CameraDevice;
 import com.vuforia.DataSet;
 import com.vuforia.ObjectTracker;
@@ -60,6 +62,8 @@ import com.vuforia.samples.VuforiaSamples.ui.SampleAppMenu.SampleAppMenuInterfac
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+
+import microsoft.swagger.codegen.ratingsedgefd.models.MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1RatingsSummaryContract;
 
 public class PicassoMainActivity extends Activity implements SampleApplicationControl,
         SampleAppMenuInterface, SensorEventListener
@@ -107,6 +111,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
 
     MyTouch mTouch;
 
+    MicrosoftMarketplaceStorefrontRatingsRatingsEdgeContractsV1RatingsSummaryContract reviewData;
 
     // Called when the activity first starts or the user navigates back to an
     // activity.
@@ -142,6 +147,7 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
         // Register the onClick listener with the implementation above
         button.setOnClickListener(compareButtonListener);
 
+        this.LoadData();
     }
 
 
@@ -852,4 +858,28 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
             }
         });
     }
+
+    private void LoadData()
+    {
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try  {
+                    reviewData = ProductRating.RequestProductRating();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+
+    }
+
+    private void PopulateData()
+    {
+
+    }
+
 }
