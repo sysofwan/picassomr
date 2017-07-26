@@ -240,9 +240,9 @@ public class PicassoRenderer implements GLSurfaceView.Renderer, SampleAppRendere
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
-        float[] lightPosition = new Vec3F(0, 0, 100).getData();
-        float[] lightColor = new Vec3F(0.2f,0.2f,0.2f).getData();
-        float shineDamper = 10f;
+        float[] lightPosition = new Vec3F(500, 1000, 1000).getData();
+        float[] lightColor = new Vec3F(0.01f,0.01f,0.01f).getData();
+        float shineDamper = 1f;
         float reflectivity = 1f;
 
         if (state.getNumTrackableResults() == 0)

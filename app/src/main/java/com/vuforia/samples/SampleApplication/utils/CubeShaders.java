@@ -47,7 +47,7 @@ public class CubeShaders
             + "uniform vec3 lightPosition; \n" + "\n"
             + "void main() \n" + "{ \n"
             + "   vec4 worldPosition = transformationMatrix * vertexPosition; \n"
-            + "   gl_Position = modelViewProjectionMatrix * worldPosition; \n"
+            + "   gl_Position = modelViewProjectionMatrix * vertexPosition; \n"
             + "   texCoord = vertexTexCoord; \n"
             + "   surfaceNormal = (transformationMatrix * vec4(vertexNormals, 0.0)).xyz; \n"
             + "   toLightVector = lightPosition * worldPosition.xyz; \n"
@@ -78,7 +78,8 @@ public class CubeShaders
             + "   specularFactor = max(specularFactor, 0.1); \n"
             + "   float dampedFactor = pow(specularFactor, shineDamper); \n"
             + "   vec3 finalSpecular = dampedFactor * reflectivity * lightColor; \n"
-            + "   gl_FragColor = vec4(diffuse, 1.0) * texture2D(texSampler2D, texCoord) + vec4(finalSpecular, 1.0); \n"
+            + "   gl_FragColor = texture2D(texSampler2D, texCoord) + vec4(finalSpecular, 1.0); \n"
+            //+ "   gl_FragColor = vec4(diffuse, 1.0) * texture2D(texSampler2D, texCoord) + vec4(finalSpecular, 1.0); \n"
             //+ "   gl_FragColor = vec4(diffuse, 1.0) * texture2D(texSampler2D, texCoord) * vec4(lightColor, 1.0); \n"
             //+ "   gl_FragColor = texture2D(texSampler2D, texCoord); \n"
             + "} \n";
