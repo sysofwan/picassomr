@@ -952,28 +952,126 @@ public class PicassoMainActivity extends Activity implements SampleApplicationCo
     {
         if(reviewData != null)
         {
-            TextView averageRatingValue = (TextView)mUILayout.findViewById(R.id.averageRatingValue);
-            TextView favorableRatingValue = (TextView)mUILayout.findViewById(R.id.favorableRatingValue);
+            ImageView averageRatingImage = (ImageView)mUILayout.findViewById(R.id.averageRatingImage);
+            ImageView favorableRatingImage = (ImageView)mUILayout.findViewById(R.id.favorableRatingImage);
             TextView favorableRatingTitle = (TextView)mUILayout.findViewById(R.id.favorableRatingTitle);
             TextView favorableRatingText = (TextView)mUILayout.findViewById(R.id.favorableRatingText);
 
-            TextView criticalRatingValue = (TextView)mUILayout.findViewById(R.id.criticalRatingValue);
+            ImageView criticalRatingImage = (ImageView)mUILayout.findViewById(R.id.criticalRatingImage);
             TextView criticalRatingTitle = (TextView)mUILayout.findViewById(R.id.criticalRatingTitle);
             TextView criticalRatingText = (TextView)mUILayout.findViewById(R.id.criticalRatingText);
 
-            averageRatingValue.setText(ratingData.averageRating() + "/5");
+            ImageView criticalRatingImage2 = (ImageView)mUILayout.findViewById(R.id.criticalRatingImage2);
+            TextView criticalRatingTitle2 = (TextView)mUILayout.findViewById(R.id.criticalRatingTitle2);
+            TextView criticalRatingText2 = (TextView)mUILayout.findViewById(R.id.criticalRatingText2);
+
+            Integer averageRatingInt = ratingData.averageRating().intValue();
+            if(averageRatingInt > 5)
+            {
+                averageRatingInt = 5;
+            }
+
+            switch (averageRatingInt){
+                case 0:
+                    averageRatingImage.setImageResource(R.drawable.star_rating_system_0_stars_t);
+                    break;
+                case 1:
+                    averageRatingImage.setImageResource(R.drawable.star_rating_system_1_star_t);
+                    break;
+                case 2:
+                    averageRatingImage.setImageResource(R.drawable.star_rating_system_2_stars_t);
+                    break;
+                case 3:
+                    averageRatingImage.setImageResource(R.drawable.star_rating_system_3_stars_t);
+                    break;
+                case 4:
+                    averageRatingImage.setImageResource(R.drawable.star_rating_system_4_stars_t);
+                    break;
+                case 5:
+                    averageRatingImage.setImageResource(R.drawable.star_rating_system_5_stars_t);
+                    break;
+            }
 
 
             if(reviewData.items().size() > 0) {
-                favorableRatingValue.setText(reviewData.items().get(0).rating() + "/5");
+
+                switch (reviewData.items().get(0).rating()){
+                    case 0:
+                        favorableRatingImage.setImageResource(R.drawable.star_rating_system_0_stars_t);
+                        break;
+                    case 1:
+                        favorableRatingImage.setImageResource(R.drawable.star_rating_system_1_star_t);
+                        break;
+                    case 2:
+                        favorableRatingImage.setImageResource(R.drawable.star_rating_system_2_stars_t);
+                        break;
+                    case 3:
+                        favorableRatingImage.setImageResource(R.drawable.star_rating_system_3_stars_t);
+                        break;
+                    case 4:
+                        favorableRatingImage.setImageResource(R.drawable.star_rating_system_4_stars_t);
+                        break;
+                    case 5:
+                        favorableRatingImage.setImageResource(R.drawable.star_rating_system_5_stars_t);
+                        break;
+                }
+
                 favorableRatingTitle.setText(reviewData.items().get(0).title());
                 favorableRatingText.setText(reviewData.items().get(0).reviewText());
             }
 
             if(reviewData.items().size() > 1) {
-                criticalRatingValue.setText(reviewData.items().get(1).rating() + "/5");
+
+                switch (reviewData.items().get(1).rating()){
+                    case 0:
+                        criticalRatingImage.setImageResource(R.drawable.star_rating_system_0_stars_t);
+                        break;
+                    case 1:
+                        criticalRatingImage.setImageResource(R.drawable.star_rating_system_1_star_t);
+                        break;
+                    case 2:
+                        criticalRatingImage.setImageResource(R.drawable.star_rating_system_2_stars_t);
+                        break;
+                    case 3:
+                        criticalRatingImage.setImageResource(R.drawable.star_rating_system_3_stars_t);
+                        break;
+                    case 4:
+                        criticalRatingImage.setImageResource(R.drawable.star_rating_system_4_stars_t);
+                        break;
+                    case 5:
+                        criticalRatingImage.setImageResource(R.drawable.star_rating_system_5_stars_t);
+                        break;
+                }
+
                 criticalRatingTitle.setText(reviewData.items().get(1).title());
                 criticalRatingText.setText(reviewData.items().get(1).reviewText());
+            }
+
+            if(reviewData.items().size() > 2) {
+
+                switch (reviewData.items().get(2).rating()){
+                    case 0:
+                        criticalRatingImage2.setImageResource(R.drawable.star_rating_system_0_stars_t);
+                        break;
+                    case 1:
+                        criticalRatingImage2.setImageResource(R.drawable.star_rating_system_1_star_t);
+                        break;
+                    case 2:
+                        criticalRatingImage2.setImageResource(R.drawable.star_rating_system_2_stars_t);
+                        break;
+                    case 3:
+                        criticalRatingImage2.setImageResource(R.drawable.star_rating_system_3_stars_t);
+                        break;
+                    case 4:
+                        criticalRatingImage2.setImageResource(R.drawable.star_rating_system_4_stars_t);
+                        break;
+                    case 5:
+                        criticalRatingImage2.setImageResource(R.drawable.star_rating_system_5_stars_t);
+                        break;
+                }
+
+                criticalRatingTitle2.setText(reviewData.items().get(2).title());
+                criticalRatingText2.setText(reviewData.items().get(2).reviewText());
             }
         }
     }
